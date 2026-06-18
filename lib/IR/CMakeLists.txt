@@ -68,6 +68,7 @@ add_library(ave-lang-mlir
   ${NVVM_INTRINSICS_OBJ}
   ${AMDGPU_INTRINSICS_OBJ}
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-mlir)
 
 add_dependencies(ave-lang-mlir ave-lang-dialect)
 
@@ -109,5 +110,6 @@ target_link_libraries(ave-lang-mlir
 )
 
 add_executable(mlir_generator_test mlir_generator_test.cc)
+ave_lang_disable_rtti_for_llvm(mlir_generator_test)
 target_link_libraries(mlir_generator_test ave-lang-frontend ave-lang-mlir ave-lang-dialect-transforms GTest::gtest_main)
 add_test(mlir_generator_test mlir_generator_test)

@@ -1,6 +1,7 @@
 add_library(ave-lang-driver
   driver.cc
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-driver)
 
 target_link_libraries(ave-lang-driver
   PRIVATE

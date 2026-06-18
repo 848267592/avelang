@@ -12,5 +12,6 @@ target_link_libraries(ave-lang-frontend
 )
 
 add_executable(ave-lang-parser-test avelang_parser_test.cc)
+ave_lang_disable_rtti_for_llvm(ave-lang-parser-test)
 target_link_libraries(ave-lang-parser-test ave-lang-frontend clangFrontend LLVMSupport GTest::gtest_main)
 add_test(NAME ave-lang-parser-test COMMAND ave-lang-parser-test)

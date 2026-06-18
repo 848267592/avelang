@@ -2,6 +2,7 @@ add_library(ave-lang-target-nvvm
   gpu_to_nvvm_pipeline.cc
   nvvm_backend.cc
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-target-nvvm)
 
 target_link_libraries(ave-lang-target-nvvm
   PRIVATE
@@ -36,6 +37,7 @@ target_compile_definitions(ave-lang-target-nvvm PRIVATE ${LLVM_DEFINITIONS})
 
 # Add NVVM codegen test
 add_executable(nvvm_codegen_test nvvm_codegen_test.cc)
+ave_lang_disable_rtti_for_llvm(nvvm_codegen_test)
 target_link_libraries(nvvm_codegen_test
   ave-lang-target-nvvm
   ave-lang-driver

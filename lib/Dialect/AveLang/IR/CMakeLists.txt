@@ -18,6 +18,7 @@ add_library(ave-lang-dialect
     AveLangOps.cc
     AveLangTypes.cc
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-dialect)
 
 target_include_directories(ave-lang-dialect PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

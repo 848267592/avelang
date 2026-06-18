@@ -5,6 +5,7 @@ add_library(ave-lang-dialect-transforms
   lower_ave_lang_to_memref_pass.cc
   lower_gpuop_to_intrinsics_pass.cc
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-dialect-transforms)
 
 target_include_directories(ave-lang-dialect-transforms PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

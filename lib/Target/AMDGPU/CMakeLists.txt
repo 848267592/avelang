@@ -6,6 +6,7 @@ add_library(ave-lang-target-amdgpu
   rocm_installation_detector.cc
   amdgpu_toolchain.cc
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-target-amdgpu)
 
 target_link_libraries(ave-lang-target-amdgpu
   PRIVATE
@@ -47,6 +48,7 @@ target_compile_definitions(ave-lang-target-amdgpu PRIVATE ${LLVM_DEFINITIONS})
 
 # Add AMDGPU codegen test
 add_executable(amdgpu_codegen_test amdgpu_codegen_test.cc)
+ave_lang_disable_rtti_for_llvm(amdgpu_codegen_test)
 target_link_libraries(amdgpu_codegen_test
   ave-lang-target-amdgpu
   ave-lang-driver

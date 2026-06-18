@@ -140,6 +140,12 @@ endif()
 include_directories(include lib)
 include_directories(${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS})
 
+function(ave_lang_disable_rtti_for_llvm target)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${target} PRIVATE -fno-rtti)
+  endif()
+endfunction()
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/avelang)
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/avelang/config.h.in

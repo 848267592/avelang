@@ -4,6 +4,7 @@ add_library(ave-lang-target-gpu
   gpu_backend.cc
   link_intrinsic_implementation.cc
 )
+ave_lang_disable_rtti_for_llvm(ave-lang-target-gpu)
 
 target_link_libraries(ave-lang-target-gpu
   PRIVATE
@@ -49,6 +50,7 @@ endif()
 target_compile_definitions(ave-lang-target-gpu PRIVATE ${LLVM_DEFINITIONS})
 
 add_executable(lower_to_llvm_test lower_to_llvm_test.cc)
+ave_lang_disable_rtti_for_llvm(lower_to_llvm_test)
 target_link_libraries(lower_to_llvm_test 
   ave-lang-target-gpu
   GTest::gtest_main
@@ -57,6 +59,7 @@ target_link_libraries(lower_to_llvm_test
 add_test(lower_to_llvm_test lower_to_llvm_test)
 
 add_executable(gpu_outlining_test gpu_outlining_test.cc)
+ave_lang_disable_rtti_for_llvm(gpu_outlining_test)
 target_link_libraries(gpu_outlining_test 
   ave-lang-target-gpu
   GTest::gtest_main
