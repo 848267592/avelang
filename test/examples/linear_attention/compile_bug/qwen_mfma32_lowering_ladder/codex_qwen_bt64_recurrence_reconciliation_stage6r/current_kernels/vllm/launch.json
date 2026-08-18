@@ -1,0 +1,32 @@
+{
+  "symbol": "chunk_gated_delta_rule_fwd_kernel_h_blockdim64",
+  "grid_formula": "(ceil(V/BV), B*H)",
+  "grid_t2048": [
+    4,
+    8,
+    1
+  ],
+  "workgroup": 128,
+  "num_warps": 2,
+  "num_stages": 2,
+  "BV": 32,
+  "BT": 64,
+  "shared_bytes": 40960,
+  "specialization_constants": {
+    "(5,)": null,
+    "(9,)": null,
+    "(10,)": null,
+    "(12,)": 8,
+    "(13,)": 4,
+    "(14,)": 128,
+    "(15,)": 128,
+    "(16,)": 64,
+    "(17,)": 32,
+    "(18,)": true,
+    "(19,)": false,
+    "(20,)": true,
+    "(21,)": true,
+    "(22,)": true,
+    "(23,)": false
+  }
+}
