@@ -31,6 +31,18 @@ module {
     return %3 : vector<4xf32>
   }
 
+  // FP32 MFMA is needed by the BT64 hierarchical solve experiment.  Each
+  // lane contributes one A value, one B value, and four FP32 accumulators.
+  func.func private @_avelang_amdgpu_rocdl_mfma_f32_16x16x4_f32(%arg0: vector<1xf32>, %arg1: vector<1xf32>, %arg2: vector<4xf32>) -> vector<4xf32> attributes {func.inline = "always"} {
+    %c0_i32 = arith.constant 0 : i32
+    // The Avelang MFMA ABI represents every fragment as a rank-one vector,
+    // while the LLVM/ROCDL FP32 16x16x4 intrinsic takes scalar A/B operands.
+    %a = vector.extract %arg0[0] : f32 from vector<1xf32>
+    %b = vector.extract %arg1[0] : f32 from vector<1xf32>
+    %3 = rocdl.mfma.f32.16x16x4f32 %a, %b, %arg2, %c0_i32, %c0_i32, %c0_i32 : (f32, f32, vector<4xf32>, i32, i32, i32) -> vector<4xf32>
+    return %3 : vector<4xf32>
+  }
+
   func.func private @_avelang_amdgpu_rocdl_mfma_f32_16x16x16bf16_1k(%arg0: vector<4xbf16>, %arg1: vector<4xbf16>, %arg2: vector<4xf32>) -> vector<4xf32> attributes {func.inline = "always"} {
     %c0_i32 = arith.constant 0 : i32
     %a_i16 = vector.bitcast %arg0 : vector<4xbf16> to vector<4xi16>

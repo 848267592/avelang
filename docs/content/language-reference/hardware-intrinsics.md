@@ -30,13 +30,14 @@ The currently registered MFMA wrappers are:
 
 ```text
 mfma_16x16x16_f16_f32
+mfma_16x16x4_f32_f32
 mfma_16x16x16_bf16_f32
 mfma_f32_16x16x16_bf16
 mfma_32x32x8_bf16_f32
 mfma_f32_32x32x8_bf16
 ```
 
-The name encodes the matrix shape and operand types. For example, `mfma_32x32x8_bf16_f32` consumes BF16 input fragments for a `32 x 32 x 8` operation and accumulates into F32. The fragment shapes must match the instruction. For `mfma_32x32x8_bf16_f32`, each lane contributes four BF16 values from `A`, four BF16 values from `B`, and holds sixteen F32 accumulator values.
+The name encodes the matrix shape and operand types. For example, `mfma_32x32x8_bf16_f32` consumes BF16 input fragments for a `32 x 32 x 8` operation and accumulates into F32. The fragment shapes must match the instruction. For `mfma_32x32x8_bf16_f32`, each lane contributes four BF16 values from `A`, four BF16 values from `B`, and holds sixteen F32 accumulator values. For `mfma_16x16x4_f32_f32`, each lane contributes one FP32 value from `A`, one FP32 value from `B`, and holds four FP32 accumulator values.
 
 Use `al.view` to reinterpret packed words as the fragment shape expected by the instruction:
 
@@ -145,4 +146,3 @@ ldmatrix_m8n8_x4_b16_trans
 ```
 
 The corresponding store wrappers use `stmatrix_m8n8_x1_b16`, `stmatrix_m8n8_x2_b16`, and `stmatrix_m8n8_x4_b16`, with `_trans` variants for the transposed layout.
-
