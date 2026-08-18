@@ -117,3 +117,29 @@ git push -u myfork agent/x2-z5b-submission-2026-08-18
 
 本记录在推送完成后补写实际 commit hash、远端分支和 `git push` 返回结果；若网络或
 SSH 暂时不可用，只记录失败原因，不把“本地 commit 成功”误写成“远端上传成功”。
+
+## 本次实际结果
+
+本地分支：`agent/x2-z5b-submission-2026-08-18`
+
+远端：`myfork` -> `git@github.com:848267592/avelang.git`
+
+已推送的三个主体 commit：
+
+```text
+d3edae81b91d12a8839c843e088647e68379689b compiler: expose gfx942 fp32 mfma16x16x4 intrinsic
+c76edef8e5da0842467cb5371c8e717d925a4ce9 qwen: add X2+Z5B runtime
+a2c8ccf0e0376a927bcd999eb737368ce95c3038 qwen: verify X2+Z5B full Eager performance
+```
+
+实际推送命令：
+
+```bash
+git push -u myfork agent/x2-z5b-submission-2026-08-18
+```
+
+结果：成功创建并上传远端分支。GitHub 给出的可选 PR 地址为：
+
+`https://github.com/848267592/avelang/pull/new/agent/x2-z5b-submission-2026-08-18`
+
+本次没有创建 PR；直接访问上面的地址即可人工审查或创建 PR。
