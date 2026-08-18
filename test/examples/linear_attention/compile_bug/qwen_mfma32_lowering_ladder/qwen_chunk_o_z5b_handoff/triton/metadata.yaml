@@ -1,0 +1,22 @@
+name: current-vllm-chunk-o
+source: chunk_o.py
+origin: vllm.model_executor.layers.fla.ops.chunk_o
+target: gfx942
+warp_size: 64
+contract:
+  BT: 64
+  BK: 32
+  BV: 64
+  q_dtype: bfloat16
+  k_dtype: bfloat16
+  v_new_dtype: bfloat16
+  h_dtype: bfloat16
+  g_dtype: float32
+  accumulator_dtype: float32
+  output_dtype: bfloat16
+notes:
+  - The source is Triton Python captured from the installed vLLM package.
+  - Triton autotunes BK/BV/num_warps/num_stages by shape.
+  - T=2048 same-shape diagnostic used BK32/BV64/WG256 in the archived capture.
+  - Long-text selector choices must be recorded, not inferred from T=2048.
+  - TTIR/TTGIR/LLVM/ISA/HSACO remain in the full Stage 6Z evidence archive.

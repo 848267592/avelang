@@ -1,0 +1,89 @@
+{
+  "benchmark": "standalone_chunk_o_z5b_vs_current_vllm_triton_body",
+  "repeat": 1,
+  "rows": [
+    {
+      "T": 64,
+      "arms": {
+        "triton": {
+          "hip_ms": {
+            "median": 0.0667790025472641,
+            "p10": 0.0667790025472641,
+            "p90": 0.0667790025472641
+          },
+          "samples": 1,
+          "wall_ms": {
+            "median": 0.085267,
+            "p10": 0.085267,
+            "p90": 0.085267
+          }
+        },
+        "z5b": {
+          "hip_ms": {
+            "median": 0.07595299929380417,
+            "p10": 0.07595299929380417,
+            "p90": 0.07595299929380417
+          },
+          "samples": 1,
+          "wall_ms": {
+            "median": 0.120449,
+            "p10": 0.120449,
+            "p90": 0.120449
+          }
+        }
+      },
+      "chunks": 1,
+      "contract": {
+        "caller_owned_output": true,
+        "cuda_graph_used": false,
+        "current_stream": true,
+        "repeat": 1,
+        "warmup": 1
+      },
+      "diagnostic": {
+        "bf16_output_max_abs_difference": 0.125,
+        "finite": true,
+        "z5b_minus_triton_us": 9.17399674654007,
+        "z5b_over_triton": 1.1373784632384558
+      },
+      "order": [
+        "z5b",
+        "triton"
+      ],
+      "session": 0,
+      "shape": {
+        "B": 1,
+        "BT": 64,
+        "H": 8,
+        "Hg": 4,
+        "K": 128,
+        "V": 128
+      },
+      "triton_selected_config": {
+        "kwargs": {
+          "BK": 32,
+          "BV": 32
+        },
+        "num_ctas": 1,
+        "num_stages": 3,
+        "num_warps": 4,
+        "workgroup": 256
+      }
+    }
+  ],
+  "sessions": 1,
+  "slope_us_per_chunk": {
+    "triton": 0.0,
+    "z5b": 0.0
+  },
+  "summary": [
+    {
+      "T": 64,
+      "chunks": 1,
+      "triton_median_of_session_medians_ms": 0.0667790025472641,
+      "z5b_median_of_session_medians_ms": 0.07595299929380417
+    }
+  ],
+  "timing": "HIP event on current stream; no graph; preallocated output",
+  "warmup": 1
+}

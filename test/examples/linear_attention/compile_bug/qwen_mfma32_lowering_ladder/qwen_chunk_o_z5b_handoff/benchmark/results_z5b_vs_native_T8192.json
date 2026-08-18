@@ -1,0 +1,504 @@
+{
+  "T": 8192,
+  "contract": {
+    "cuda_graph_used": false,
+    "current_stream": true,
+    "fresh_process_sessions": true,
+    "native": "fresh public selector seed, then direct WG256 preallocated body",
+    "preallocated_outputs": true,
+    "repeat": 50,
+    "rotating_orders": [
+      "z2,z5a,z5b,native",
+      "native,z5b,z5a,z2",
+      "z5a,z2,native,z5b",
+      "z5b,native,z2,z5a",
+      "native,z2,z5b,z5a"
+    ],
+    "sessions": 5,
+    "warmup": 10
+  },
+  "paired_differences_us": {
+    "z5a_minus_z2_us": [
+      -16.123495995998383,
+      -16.264505684375763,
+      -13.98099958896637,
+      -16.96550101041794,
+      -17.025500535964966
+    ],
+    "z5b_minus_native_us": [
+      65.47700241208076,
+      57.00500309467316,
+      66.51949882507324,
+      66.85850024223328,
+      60.56999787688255
+    ],
+    "z5b_minus_z2_us": [
+      -19.92899179458618,
+      -19.969500601291656,
+      -20.81099897623062,
+      -20.029999315738678,
+      -21.432004868984222
+    ],
+    "z5b_minus_z5a_us": [
+      -3.805495798587799,
+      -3.7049949169158936,
+      -6.829999387264252,
+      -3.0644983053207397,
+      -4.406504333019257
+    ],
+    "z5b_over_native": [
+      1.7225845830826065,
+      1.5730989158427007,
+      1.7329608747754572,
+      1.7407733695256022,
+      1.6356952571287573
+    ]
+  },
+  "raw": [
+    {
+      "T": 8192,
+      "arms": {
+        "native": {
+          "hip_ms": {
+            "median": 0.09061500057578087,
+            "p10": 0.08825100213289261,
+            "p90": 0.09341800212860107
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.10624249999999999,
+            "p10": 0.103524,
+            "p90": 0.109332
+          }
+        },
+        "z2": {
+          "hip_ms": {
+            "median": 0.17602099478244781,
+            "p10": 0.1745000034570694,
+            "p90": 0.19865499436855316
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.1918855,
+            "p10": 0.190213,
+            "p90": 0.216112
+          }
+        },
+        "z5a": {
+          "hip_ms": {
+            "median": 0.15989749878644943,
+            "p10": 0.15855500102043152,
+            "p90": 0.16600699722766876
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.175531,
+            "p10": 0.173939,
+            "p90": 0.18177
+          }
+        },
+        "z5b": {
+          "hip_ms": {
+            "median": 0.15609200298786163,
+            "p10": 0.15494999289512634,
+            "p90": 0.15895600616931915
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.171811,
+            "p10": 0.170553,
+            "p90": 0.17517
+          }
+        }
+      },
+      "chunks": 128,
+      "cuda_graph_used": false,
+      "current_stream": true,
+      "fresh_process_worker": true,
+      "native_contract": "selected public WG256/BK32/BV64/stage2 then direct preallocated body",
+      "order": [
+        "z2",
+        "z5a",
+        "z5b",
+        "native"
+      ],
+      "repeat": 50,
+      "scope": "caller_owned_isolated_body_diagnostic",
+      "session": 0,
+      "warmup": 10,
+      "workgroup": {
+        "native": 256,
+        "z2": 256,
+        "z5a": 256,
+        "z5b": 256
+      }
+    },
+    {
+      "T": 8192,
+      "arms": {
+        "native": {
+          "hip_ms": {
+            "median": 0.09946800023317337,
+            "p10": 0.08761099725961685,
+            "p90": 0.10872200131416321
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.1161175,
+            "p10": 0.104555,
+            "p90": 0.124485
+          }
+        },
+        "z2": {
+          "hip_ms": {
+            "median": 0.17644250392913818,
+            "p10": 0.17438000440597534,
+            "p90": 0.18102900683879852
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.192171,
+            "p10": 0.190072,
+            "p90": 0.196633
+          }
+        },
+        "z5a": {
+          "hip_ms": {
+            "median": 0.16017799824476242,
+            "p10": 0.15899600088596344,
+            "p90": 0.1646440029144287
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.17593150000000002,
+            "p10": 0.17461,
+            "p90": 0.181009
+          }
+        },
+        "z5b": {
+          "hip_ms": {
+            "median": 0.15647300332784653,
+            "p10": 0.15539099276065826,
+            "p90": 0.16384300589561462
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.1723765,
+            "p10": 0.171074,
+            "p90": 0.180708
+          }
+        }
+      },
+      "chunks": 128,
+      "cuda_graph_used": false,
+      "current_stream": true,
+      "fresh_process_worker": true,
+      "native_contract": "selected public WG256/BK32/BV64/stage2 then direct preallocated body",
+      "order": [
+        "native",
+        "z5b",
+        "z5a",
+        "z2"
+      ],
+      "repeat": 50,
+      "scope": "caller_owned_isolated_body_diagnostic",
+      "session": 1,
+      "warmup": 10,
+      "workgroup": {
+        "native": 256,
+        "z2": 256,
+        "z5a": 256,
+        "z5b": 256
+      }
+    },
+    {
+      "T": 8192,
+      "arms": {
+        "native": {
+          "hip_ms": {
+            "median": 0.09075450152158737,
+            "p10": 0.08897200226783752,
+            "p90": 0.09414000064134598
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.1065385,
+            "p10": 0.104615,
+            "p90": 0.110695
+          }
+        },
+        "z2": {
+          "hip_ms": {
+            "median": 0.17808499932289124,
+            "p10": 0.1757809966802597,
+            "p90": 0.20402300357818604
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.193938,
+            "p10": 0.191525,
+            "p90": 0.226416
+          }
+        },
+        "z5a": {
+          "hip_ms": {
+            "median": 0.16410399973392487,
+            "p10": 0.15967699885368347,
+            "p90": 0.17157499492168427
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.18011300000000002,
+            "p10": 0.17534,
+            "p90": 0.187629
+          }
+        },
+        "z5b": {
+          "hip_ms": {
+            "median": 0.15727400034666061,
+            "p10": 0.15567100048065186,
+            "p90": 0.1613599956035614
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.1733825,
+            "p10": 0.171585,
+            "p90": 0.178445
+          }
+        }
+      },
+      "chunks": 128,
+      "cuda_graph_used": false,
+      "current_stream": true,
+      "fresh_process_worker": true,
+      "native_contract": "selected public WG256/BK32/BV64/stage2 then direct preallocated body",
+      "order": [
+        "z5a",
+        "z2",
+        "native",
+        "z5b"
+      ],
+      "repeat": 50,
+      "scope": "caller_owned_isolated_body_diagnostic",
+      "session": 2,
+      "warmup": 10,
+      "workgroup": {
+        "native": 256,
+        "z2": 256,
+        "z5a": 256,
+        "z5b": 256
+      }
+    },
+    {
+      "T": 8192,
+      "arms": {
+        "native": {
+          "hip_ms": {
+            "median": 0.0902549996972084,
+            "p10": 0.08741000294685364,
+            "p90": 0.09301900118589401
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.105622,
+            "p10": 0.103053,
+            "p90": 0.110264
+          }
+        },
+        "z2": {
+          "hip_ms": {
+            "median": 0.17714349925518036,
+            "p10": 0.1747799962759018,
+            "p90": 0.18555599451065063
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.193177,
+            "p10": 0.190554,
+            "p90": 0.202191
+          }
+        },
+        "z5a": {
+          "hip_ms": {
+            "median": 0.16017799824476242,
+            "p10": 0.1593170017004013,
+            "p90": 0.16200000047683716
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.17636200000000002,
+            "p10": 0.175171,
+            "p90": 0.179157
+          }
+        },
+        "z5b": {
+          "hip_ms": {
+            "median": 0.15711349993944168,
+            "p10": 0.15539099276065826,
+            "p90": 0.17029300332069397
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.17316700000000002,
+            "p10": 0.170734,
+            "p90": 0.1886
+          }
+        }
+      },
+      "chunks": 128,
+      "cuda_graph_used": false,
+      "current_stream": true,
+      "fresh_process_worker": true,
+      "native_contract": "selected public WG256/BK32/BV64/stage2 then direct preallocated body",
+      "order": [
+        "z5b",
+        "native",
+        "z2",
+        "z5a"
+      ],
+      "repeat": 50,
+      "scope": "caller_owned_isolated_body_diagnostic",
+      "session": 3,
+      "warmup": 10,
+      "workgroup": {
+        "native": 256,
+        "z2": 256,
+        "z5a": 256,
+        "z5b": 256
+      }
+    },
+    {
+      "T": 8192,
+      "arms": {
+        "native": {
+          "hip_ms": {
+            "median": 0.09528150036931038,
+            "p10": 0.08933299779891968,
+            "p90": 0.10856200009584427
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.112051,
+            "p10": 0.104355,
+            "p90": 0.127549
+          }
+        },
+        "z2": {
+          "hip_ms": {
+            "median": 0.17728350311517715,
+            "p10": 0.1748189926147461,
+            "p90": 0.19112400710582733
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.19267600000000001,
+            "p10": 0.190483,
+            "p90": 0.208039
+          }
+        },
+        "z5a": {
+          "hip_ms": {
+            "median": 0.1602580025792122,
+            "p10": 0.1588360071182251,
+            "p90": 0.16736899316310883
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.176312,
+            "p10": 0.174118,
+            "p90": 0.183472
+          }
+        },
+        "z5b": {
+          "hip_ms": {
+            "median": 0.15585149824619293,
+            "p10": 0.15463000535964966,
+            "p90": 0.161640003323555
+          },
+          "samples": 50,
+          "wall_ms": {
+            "median": 0.17129450000000002,
+            "p10": 0.170082,
+            "p90": 0.178535
+          }
+        }
+      },
+      "chunks": 128,
+      "cuda_graph_used": false,
+      "current_stream": true,
+      "fresh_process_worker": true,
+      "native_contract": "selected public WG256/BK32/BV64/stage2 then direct preallocated body",
+      "order": [
+        "native",
+        "z2",
+        "z5b",
+        "z5a"
+      ],
+      "repeat": 50,
+      "scope": "caller_owned_isolated_body_diagnostic",
+      "session": 4,
+      "warmup": 10,
+      "workgroup": {
+        "native": 256,
+        "z2": 256,
+        "z5a": 256,
+        "z5b": 256
+      }
+    }
+  ],
+  "scope": "caller_owned_isolated_body_diagnostic",
+  "summary": [
+    {
+      "arm": "z2",
+      "mean_of_session_medians_ms": 0.17699510008096694,
+      "median_of_session_medians_ms": 0.17714349925518036,
+      "session_count": 5,
+      "session_medians_ms": [
+        0.17602099478244781,
+        0.17644250392913818,
+        0.17808499932289124,
+        0.17714349925518036,
+        0.17728350311517715
+      ]
+    },
+    {
+      "arm": "z5a",
+      "mean_of_session_medians_ms": 0.16092309951782227,
+      "median_of_session_medians_ms": 0.16017799824476242,
+      "session_count": 5,
+      "session_medians_ms": [
+        0.15989749878644943,
+        0.16017799824476242,
+        0.16410399973392487,
+        0.16017799824476242,
+        0.1602580025792122
+      ]
+    },
+    {
+      "arm": "z5b",
+      "mean_of_session_medians_ms": 0.15656080096960068,
+      "median_of_session_medians_ms": 0.15647300332784653,
+      "session_count": 5,
+      "session_medians_ms": [
+        0.15609200298786163,
+        0.15647300332784653,
+        0.15727400034666061,
+        0.15711349993944168,
+        0.15585149824619293
+      ]
+    },
+    {
+      "arm": "native",
+      "mean_of_session_medians_ms": 0.09327480047941208,
+      "median_of_session_medians_ms": 0.09075450152158737,
+      "session_count": 5,
+      "session_medians_ms": [
+        0.09061500057578087,
+        0.09946800023317337,
+        0.09075450152158737,
+        0.0902549996972084,
+        0.09528150036931038
+      ]
+    }
+  ]
+}
