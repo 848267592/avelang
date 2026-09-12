@@ -1,0 +1,17 @@
+---
+amdhsa.kernels:
+  - .name: chunk_gated_delta_rule_fwd_kernel_h_blockdim64
+    .symbol: chunk_gated_delta_rule_fwd_kernel_h_blockdim64.kd
+    .kernarg_segment_size: 88
+    .kernarg_segment_align: 8
+    .group_segment_fixed_size: 0
+    .private_segment_fixed_size: 0
+    .max_flat_workgroup_size: 256
+    .wavefront_size: 64
+    .sgpr_count: 79
+    .agpr_count: 64
+    .vgpr_count: 320
+    .sgpr_spill_count: 0
+    .vgpr_spill_count: 0
+amdhsa.target: amdgcn-amd-amdhsa--gfx942
+amdhsa.version: [1, 2]

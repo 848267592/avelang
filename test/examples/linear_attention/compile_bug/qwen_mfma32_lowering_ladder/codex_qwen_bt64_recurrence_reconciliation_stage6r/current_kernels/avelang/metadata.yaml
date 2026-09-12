@@ -1,0 +1,10 @@
+{
+  "target": "gfx942",
+  "symbol": "qwen_gdn_bt64_gfx942_asm_v0",
+  "historical_resource_contract": {
+    "vgpr": 128,
+    "accvgpr": 192,
+    "sgpr": 80,
+    "scratch": 0
+  }
+}

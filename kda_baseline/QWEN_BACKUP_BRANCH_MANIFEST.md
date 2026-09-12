@@ -146,8 +146,11 @@ kda_baseline/
 - `.hsaco`、`.o`、`.so`、`.bin`、`.llir`、`.ttir`、`.ttgir`、`.mir`、`.mlir`；
 - `rocprof_outputs/`、`.rocprofv3/`、raw sessions、`golden_capture/`；
 - `compiler_ir/`、`exact_lto/`、`machine/`、`isa/` 大型 dump；
-- `vllm_compare/` 中未列入 allowlist 的历史版本、profile/dump/地址或 packet probe；
-- compile_bug 下 Stage 1--7 的完整历史实验目录；
+- `vllm_compare/` 中未列入核心 allowlist 或历史归档的版本，以及生成性的
+  dump/地址/packet 工件；v10--v31 的源码和报告由
+  `QWEN_HISTORY_ALLOWLIST.md` 额外收录；
+- compile_bug 下的生成性实验输出目录；源码和报告按
+  `QWEN_HISTORY_ALLOWLIST.md` 额外收录；
 - Kimi/Qwen 模型权重；
 - SGLang/vLLM/AITER 官方源码副本。
 
@@ -205,3 +208,19 @@ allowlist 新增文件、4 个迁移元数据文件，以及上面列出的 KDA/
 迁移遗漏。主迁移 commit 为 `3fde826`，状态 commit 为 `c6e3172`；远端最终 HEAD
 为 `c6e31721535bca08d47f159b9633cb54d1592047`。临时 clone 已完成 hash、语法、
 关键入口和容器 metadata 验证并删除；当前**未删除或移动项目文件，也未修改 Docker**。
+
+## 8. 历史演练源码/报告补充归档
+
+用户随后明确要求保留整个 Qwen 演练过程，而不只保留最终 full graph。因此本次
+补充纳入：
+
+- `vllm_compare/` 根目录中 v10--v31 的 146 个 Python/Markdown 文件；
+- `compile_bug/qwen_mfma32_lowering_ladder/` 中 603 个源码/脚本/报告文件，另有
+  2 个手写汇编源；
+- 合计 751 个文件、5,901,535 bytes；精确路径和 hash 见
+  `QWEN_HISTORY_SHA256.txt`。
+
+性能采样 CSV/JSON、rocprof、输入输出张量、HSACO/对象文件以及 compiler
+IR/MIR/ISA/machine 生成物明确不上传；这些内容后续可按脚本重新生成。Z5B 的
+15 个本地 Python import-closure、发布入口、bench/test、提交清单和集成报告均
+已包含，源码恢复闭包完整；Z5B 的生成 HSACO 仍需在新主机重建。

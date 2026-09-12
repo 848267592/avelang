@@ -1,0 +1,8 @@
+---
+amdhsa.kernels:
+  - .name: chunk_gated_delta_rule_fwd_kernel_h_blockdim64
+    .kernarg_segment_size: 88
+    .max_flat_workgroup_size: 256
+    .wavefront_size: 64
+    .private_segment_fixed_size: 0
+amdhsa.target: amdgcn-amd-amdhsa--gfx942

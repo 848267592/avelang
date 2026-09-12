@@ -20,7 +20,9 @@ a copy of the official SGLang/vLLM/AITER source trees.
 | Host driver baseline | ROCm driver 6.16.13 |
 
 The last recovery test cloned this branch into a temporary directory, verified
-87 Qwen files and 22 KDA/container files by SHA-256, parsed the selected
+the core 87 Qwen files and 22 KDA/container files by SHA-256. The historical
+archive adds 751 Qwen source/report files; its separate SHA-256 manifest is
+checked independently. The recovery test also parsed the selected
 Python/JSON/JSONL files, checked shell syntax, and removed the temporary clone.
 
 ## Safety rules
@@ -72,12 +74,17 @@ awk 'NF == 2 && $1 ~ /^[[:xdigit:]]{64}$/ {print}' \
 
 awk 'NF == 2 && $1 ~ /^[[:xdigit:]]{64}$/ {print}' \
   kda_baseline/KDA_BACKUP_SHA256.txt | sha256sum -c -
+
+grep -E '^[0-9a-f]{64}  ' kda_baseline/QWEN_HISTORY_SHA256.txt | sha256sum -c -
 ~~~
 
-Expected counts are 87 Qwen/full-graph files and 22 KDA/container reference
-files. The authoritative scope documents are:
+Expected counts are 87 core Qwen/full-graph files, 751 historical
+source/report files, and 22 KDA/container reference files. The authoritative
+scope documents are:
 
 - kda_baseline/QWEN_BACKUP_BRANCH_ALLOWLIST.md
+- kda_baseline/QWEN_HISTORY_ALLOWLIST.md
+- kda_baseline/QWEN_HISTORY_SHA256.txt
 - kda_baseline/QWEN_BACKUP_BRANCH_MANIFEST.md
 - kda_baseline/QWEN_REBUILD_ENV.md
 - kda_baseline/KDA_BACKUP_SHA256.txt
@@ -267,6 +274,24 @@ codex_qwen_asm_v0_integration/
 Rebuild generated HSACO/bridge artifacts on the new host with the checked-in
 build/capture scripts. Do not copy old .hsaco, .o, .so, profiler output, or
 model weights from the old host.
+
+### Historical Qwen source/report archive
+
+The complete v10--v31 experiment trail is an additional source-and-report
+archive, not a performance-data dump:
+
+~~~text
+kda_baseline/QWEN_HISTORY_ALLOWLIST.md
+kda_baseline/QWEN_HISTORY_SHA256.txt
+test/examples/linear_attention/vllm_compare/  # selected v10--v31 files
+test/examples/linear_attention/compile_bug/qwen_mfma32_lowering_ladder/
+~~~
+
+It intentionally excludes profiler sessions, sampled CSV/JSON results, tensor
+dumps, HSACO/object files, and compiler machine/ISA/IR output. Read the history
+allowlist when reconstructing the progression from v10/v11 through v31; use the
+X2+Z5B entry and reports as the current long-sequence candidate, not as a
+claim that every historical version is production-ready.
 
 ### KDA reference and benchmark files
 

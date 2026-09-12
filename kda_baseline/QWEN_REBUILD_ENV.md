@@ -158,8 +158,9 @@ Triton 或 ROCm。
 
 - `kda_baseline/QWEN_BACKUP_BRANCH_ALLOWLIST.md`：逐文件迁移范围；
 - `kda_baseline/QWEN_BACKUP_SHA256.txt`：87 个迁移文件的 hash 冻结；
+- `kda_baseline/QWEN_HISTORY_ALLOWLIST.md`：v10--v31 和 Stage 演练源码/报告范围；
+- `kda_baseline/QWEN_HISTORY_SHA256.txt`：756 个历史源码/报告文件的 hash 冻结；
 - `kda_baseline/QWEN_BACKUP_BRANCH_MANIFEST.md`：迁移审计快照和排除项；
 - `kda_baseline/docker_baseline.md`：KDA 两容器的实际版本记录；
 - `kda_baseline/KDA_CODE_PATHS.md`：SGLang/vLLM KDA 代码调用链；
 - `kda_baseline/env_host.txt`：MI300X/ROCm/Docker 宿主机检查记录。
-

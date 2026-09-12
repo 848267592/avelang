@@ -1,8 +1,10 @@
-# 独立 Qwen / KDA 备份分支：文件 allowlist（草案）
+# 独立 Qwen / KDA 备份分支：核心运行时 allowlist
 
-> 这是新的备份分支规划，不依赖此前已经推送到 `master` 或
-> `qwen-gdn-optimization_ljd` 的内容。当前只整理，不创建分支、不 `git add`、不
-> commit、不 push。
+> 本文件描述核心运行时闭包（Stage 6S/X2+Z5B、Q@H probe 和 KDA 迁移元数据）。
+> 历史 v10--v31 源码与整个演练过程的报告另由
+> [`QWEN_HISTORY_ALLOWLIST.md`](QWEN_HISTORY_ALLOWLIST.md) 和
+> [`QWEN_HISTORY_SHA256.txt`](QWEN_HISTORY_SHA256.txt) 补充；两份清单合在一起才
+> 是本备份分支的完整 Qwen 研究快照。
 
 ## 1. 分支目标
 
@@ -237,8 +239,9 @@ test/examples/linear_attention/compile_bug/qwen_mfma32_lowering_ladder/
 - `rocprof_outputs/`、`.rocprofv3/`、raw sessions、`golden_capture/`；
 - 所有 `.hsaco`、`.o`、`.so`、`.bin`、`.llir`、`.ttir`、`.ttgir`、`.mir`、`.mlir`；
 - `compiler_ir/`、`exact_lto/`、`machine/`、`isa/` 大型 dump；
-- `vllm_compare/` 中未列入第 2 节的历史 `v*.py`、`profile_*`、`dump_*`、一次性
-  地址/packet/register probe；
+- `vllm_compare/` 中未列入核心 allowlist 或历史归档的版本，以及生成性的
+  `dump_*`、地址/packet/register 工件；历史 v10--v31 源码和报告按
+  `QWEN_HISTORY_ALLOWLIST.md` 处理；
 - `compile_bug/` 中 Stage 1--7 的完整实验目录；
 - Kimi/Qwen 模型权重。
 
