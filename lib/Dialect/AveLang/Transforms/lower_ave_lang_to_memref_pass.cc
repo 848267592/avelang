@@ -655,6 +655,34 @@ class AnyOpTypeConversionPattern : public mlir::ConversionPattern {
             return mlir::failure();
         }
 
+        // convertOpResultTypes reconstructs an operation from operands and
+        // results only.  That is correct for ordinary leaf operations, but it
+        // silently drops bodies from region-owning semantic operations.  Keep
+        // region structure intact while converting the enclosing operation's
+        // ABI; nested operations remain available to the normal conversion
+        // driver.  R0 is the first user, but this is intentionally generic.
+        if (op->getNumRegions() != 0) {
+            llvm::SmallVector<mlir::Type> resultTypes;
+            if (mlir::failed(converter->convertTypes(op->getResultTypes(),
+                                                     resultTypes))) {
+                return mlir::failure();
+            }
+            mlir::OperationState state(op->getLoc(), op->getName());
+            state.addOperands(operands);
+            state.addTypes(resultTypes);
+            state.addAttributes(op->getAttrs());
+            for (unsigned index = 0; index < op->getNumRegions(); ++index) {
+                state.addRegion();
+            }
+            auto *newOp = rewriter.create(state);
+            for (auto [oldRegion, newRegion] :
+                 llvm::zip(op->getRegions(), newOp->getRegions())) {
+                newRegion.takeBody(oldRegion);
+            }
+            rewriter.replaceOp(op, newOp->getResults());
+            return mlir::success();
+        }
+
         auto newOp =
             mlir::convertOpResultTypes(op, operands, *converter, rewriter);
         if (mlir::failed(newOp)) {
@@ -1739,9 +1767,9 @@ void LowerAveLangToMemRefPass::runOnOperation() {
     patterns.add<
         ReinterpretCastLayoutPattern, FlattenShapeCastExtractPattern,
         FullLoweringPattern, AveLangMemRefAllocaLoweringPattern,
-        AveLangMemRefLoadLoweringPattern, AveLangMemRefLoadVecLoweringPattern,
-        AveLangMemRefStoreLoweringPattern, AveLangMemRefViewLoweringPattern,
-        AveLangMemRefCastLoweringPattern,
+        AveLangMemRefLoadLoweringPattern,
+        AveLangMemRefLoadVecLoweringPattern, AveLangMemRefStoreLoweringPattern,
+        AveLangMemRefViewLoweringPattern, AveLangMemRefCastLoweringPattern,
         AveLangMemRefExtractAlignedPointerLoweringPattern,
         AveLangMemRefSubViewLoweringPattern, EraseDeadMakeTuplePattern,
         EraseDeadMakeLayoutPattern>(&getContext());

@@ -12,6 +12,7 @@ namespace causalflow::avelang::dialect {
 
 // Define the AveLangDialect's initialize method
 void AveLangDialect::initialize() {
+    registerAttributes();
     registerTypes();
 
     addOperations<

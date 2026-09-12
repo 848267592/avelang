@@ -1,21 +1,37 @@
 #include "lower_to_llvm.h"
 #include "Dialect/AveLang/IR/AveLangDialect.h"
+#include "Dialect/AveLang/IR/AveLangOps.h"
 #include "Dialect/AveLang/Transforms/allocation_op_interface_impl.h"
+#include "Dialect/AveLang/Transforms/bounded_packet_schedule_pass.h"
 #include "Dialect/AveLang/Transforms/hoist_alloca_pass.h"
 #include "Dialect/AveLang/Transforms/lower_ave_lang_to_memref_pass.h"
 #include "Dialect/AveLang/Transforms/lower_gpuop_to_intrinsics_pass.h"
+#include "Dialect/AveLang/Transforms/lower_qwen_block_dot_pass.h"
+#include "Dialect/AveLang/Transforms/lower_qwen_gdn_recurrence_step_pass.h"
+#include "Dialect/AveLang/Transforms/lower_qwen_k64_pipeline_stage_pass.h"
+#include "Dialect/AveLang/Transforms/lower_qwen_kfrag_lds_pass.h"
+#include "Dialect/AveLang/Transforms/qwen_kfrag_producer_consumer_rewrite_pass.h"
+#include "Dialect/AveLang/Transforms/qwen_modulo_software_pipeline_pass.h"
+#include "Dialect/AveLang/Transforms/qwen_persistent_recurrence_pass.h"
 #include "IR/builtin_module.h"
 #include "IR/ir_context.h"
 #include "avelang/config.h"
 #include "gpu_backend.h"
 #include "gpu_passes.h"
 
+#include <llvm/ADT/SmallString.h>
+#include <llvm/ADT/StringExtras.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/PassInstrumentation.h>
 #include <llvm/MC/TargetRegistry.h>
 #include <llvm/Passes/OptimizationLevel.h>
 #include <llvm/Passes/PassBuilder.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/Path.h>
+#include <llvm/Support/Process.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/TargetParser/Triple.h>
@@ -53,6 +69,8 @@
 #include <mlir/Target/LLVMIR/Export.h>
 #include <mlir/Transforms/Passes.h>
 
+#include <optional>
+
 namespace mlir::func {
 class FuncDialect;
 }
@@ -60,6 +78,184 @@ class FuncDialect;
 namespace causalflow::avelang::target::gpu {
 
 using namespace mlir;
+
+namespace {
+
+void writeQwenAuditSnapshot(llvm::StringRef environment, llvm::StringRef tag,
+                            mlir::Operation *op, llvm::StringRef phase) {
+    const auto dumpDir = llvm::sys::Process::GetEnv(environment);
+    if (!dumpDir) {
+        return;
+    }
+    std::error_code ec = llvm::sys::fs::create_directories(*dumpDir);
+    if (ec) {
+        llvm::errs() << "[" << tag << "] cannot create " << *dumpDir << ": "
+                     << ec.message() << "\n";
+        return;
+    }
+    llvm::SmallString<256> path(*dumpDir);
+    llvm::sys::path::append(path, phase + ".mlir");
+    std::error_code writeEc;
+    llvm::raw_fd_ostream stream(path, writeEc);
+    if (writeEc) {
+        llvm::errs() << "[" << tag << "] cannot write " << path << ": "
+                     << writeEc.message() << "\n";
+        return;
+    }
+    op->print(stream);
+}
+
+void writeQwenAuditLLVM(llvm::StringRef environment, llvm::StringRef tag,
+                        const llvm::Module &module, llvm::StringRef phase) {
+    const auto dumpDir = llvm::sys::Process::GetEnv(environment);
+    if (!dumpDir) {
+        return;
+    }
+    std::error_code ec = llvm::sys::fs::create_directories(*dumpDir);
+    if (ec) {
+        llvm::errs() << "[" << tag << "] cannot create " << *dumpDir << ": "
+                     << ec.message() << "\n";
+        return;
+    }
+    llvm::SmallString<256> path(*dumpDir);
+    llvm::sys::path::append(path, phase + ".ll");
+    std::error_code writeEc;
+    llvm::raw_fd_ostream stream(path, writeEc);
+    if (writeEc) {
+        llvm::errs() << "[" << tag << "] cannot write " << path << ": "
+                     << writeEc.message() << "\n";
+        return;
+    }
+    module.print(stream, nullptr);
+}
+
+// This is an audit-only snapshot hook for the Qwen K-fragment A/B experiment.
+// It is inert unless AVELANG_QWEN_KFRAG_AB_DUMP_DIR is set.
+void writeQwenKFragAuditSnapshot(mlir::Operation *op, llvm::StringRef phase) {
+    writeQwenAuditSnapshot("AVELANG_QWEN_KFRAG_AB_DUMP_DIR", "qwen-kfrag-ab",
+                           op, phase);
+}
+
+void writeQwenKFragAuditLLVM(const llvm::Module &module,
+                             llvm::StringRef phase) {
+    writeQwenAuditLLVM("AVELANG_QWEN_KFRAG_AB_DUMP_DIR", "qwen-kfrag-ab",
+                       module, phase);
+}
+
+void writeQwenPersistentRecurrenceSnapshot(mlir::Operation *op,
+                                            llvm::StringRef phase) {
+    writeQwenAuditSnapshot("AVELANG_PERSISTENT_RECURRENCE_DUMP_DIR",
+                           "qwen-persistent-recurrence", op, phase);
+}
+
+void writeQwenPersistentRecurrenceLLVM(const llvm::Module &module,
+                                       llvm::StringRef phase) {
+    writeQwenAuditLLVM("AVELANG_PERSISTENT_RECURRENCE_DUMP_DIR",
+                       "qwen-persistent-recurrence", module, phase);
+}
+
+bool isQwenKFragConvergenceAuditEnabled() {
+    return llvm::sys::Process::GetEnv("AVELANG_QWEN_KFRAG_CONVERGENCE_AUDIT") ==
+           std::optional<std::string>("1");
+}
+
+std::string qwenKFragAuditSafePassName(llvm::StringRef passName) {
+    std::string safe;
+    safe.reserve(passName.size());
+    for (char ch : passName) {
+        safe.push_back(llvm::isAlnum(ch) ? ch : '_');
+    }
+    return safe.empty() ? "unnamed" : safe;
+}
+
+class QwenKFragAuditSnapshotPass
+    : public PassWrapper<QwenKFragAuditSnapshotPass, OperationPass<ModuleOp>> {
+  public:
+    explicit QwenKFragAuditSnapshotPass(std::string phase)
+        : phase_(std::move(phase)) {}
+
+    MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(QwenKFragAuditSnapshotPass)
+
+    StringRef getArgument() const override { return "qwen-kfrag-ab-snapshot"; }
+
+    StringRef getDescription() const override {
+        return "Write an audit-only Qwen K-fragment MLIR snapshot";
+    }
+
+    void runOnOperation() override {
+        writeQwenKFragAuditSnapshot(getOperation(), phase_);
+    }
+
+  private:
+    std::string phase_;
+};
+
+std::unique_ptr<Pass> createQwenKFragAuditSnapshotPass(llvm::StringRef phase) {
+    return std::make_unique<QwenKFragAuditSnapshotPass>(phase.str());
+}
+
+class QwenPersistentRecurrenceSnapshotPass
+    : public PassWrapper<QwenPersistentRecurrenceSnapshotPass,
+                         OperationPass<ModuleOp>> {
+  public:
+    explicit QwenPersistentRecurrenceSnapshotPass(std::string phase)
+        : phase_(std::move(phase)) {}
+
+    MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(
+        QwenPersistentRecurrenceSnapshotPass)
+
+    StringRef getArgument() const override {
+        return "qwen-persistent-recurrence-snapshot";
+    }
+
+    StringRef getDescription() const override {
+        return "Write an audit-only Qwen persistent recurrence MLIR snapshot";
+    }
+
+    void runOnOperation() override {
+        writeQwenPersistentRecurrenceSnapshot(getOperation(), phase_);
+    }
+
+  private:
+    std::string phase_;
+};
+
+std::unique_ptr<Pass>
+createQwenPersistentRecurrenceSnapshotPass(llvm::StringRef phase) {
+    return std::make_unique<QwenPersistentRecurrenceSnapshotPass>(phase.str());
+}
+
+class EraseAveLangEndLifetimePass
+    : public PassWrapper<EraseAveLangEndLifetimePass, OperationPass<ModuleOp>> {
+  public:
+    MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(EraseAveLangEndLifetimePass)
+
+    StringRef getArgument() const override {
+        return "erase-avelang-end-lifetime";
+    }
+
+    StringRef getDescription() const override {
+        return "Erase AveLang lifetime markers after they have survived "
+               "memref lowering and GPU outlining.";
+    }
+
+    void runOnOperation() override {
+        SmallVector<causalflow::avelang::dialect::EndLifetimeOp> ops;
+        getOperation()->walk(
+            [&](causalflow::avelang::dialect::EndLifetimeOp op) {
+                ops.push_back(op);
+            });
+        for (auto op : ops) {
+            op.erase();
+        }
+    }
+};
+
+std::unique_ptr<Pass> createEraseAveLangEndLifetimePass() {
+    return std::make_unique<EraseAveLangEndLifetimePass>();
+}
+
+} // namespace
 
 class LowerToLLVM::Impl {
   public:
@@ -174,8 +370,69 @@ class LowerToLLVM::Impl {
         // Lower ave memref types and dialect ops to memref dialect
         pm.addPass(
             causalflow::avelang::dialect::createLowerAveLangToMemRefPass());
+        // R0 first forms a region around the exact B0 full device-side loop.
+        // At this point pred, the BF16 boundary and block-dot are still one
+        // semantic unit; target planning must observe this before either the
+        // recurrence or block-dot late lowering can expand it.
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::
+                createFormQwenPersistentRecurrencePass());
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "persistent_recurrence_formed"));
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::createPlanQwenPersistentRecurrencePass());
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_recurrence_joint_planner"));
+        // The software-pipeline expander runs while the complete recurrence
+        // still owns its outer scf.for and opaque W/K producer/commit tokens.
+        // It produces prologue/steady/epilogue structure before any Qwen
+        // arithmetic or stage-token late lowering expands the body.
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::createQwenModuloSoftwarePipelinePass());
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_software_pipeline_scheduler"));
+        // The persistent fragment op is still present here.  The generic and
+        // direct-LDS runs must hash this identical snapshot before branching.
+        pm.addPass(createQwenKFragAuditSnapshotPass("pre_kfrag_branch"));
+        pm.addPass(causalflow::avelang::dialect::
+                       createQwenKFragProducerConsumerRewritePass());
+        pm.addPass(createQwenKFragAuditSnapshotPass("post_kfrag_rewrite"));
         pm.addNestedPass<mlir::func::FuncOp>(
             causalflow::avelang::dialect::createHoistAllocaPass());
+        // B1 keeps a BT64 recurrence step semantic through AveLang-to-memref.
+        // Its stream32 expansion must happen before block-dot lowering and
+        // intrinsic implementation linking, while typed BF16 operands are
+        // still visible as workgroup memrefs.
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::
+                createLowerQwenGdnRecurrenceStepPass());
+        pm.addPass(
+            createQwenKFragAuditSnapshotPass("post_recurrence_step_lowering"));
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "pre_legacy_b0_lowering"));
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::
+                createLowerQwenPersistentRecurrencePass());
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_legacy_b0_lowering"));
+        // Keep the typed block-dot semantic through AveLang-to-memref, then
+        // expand it while the MFMA implementation linker can still see the
+        // newly generated calls. Lowering after SymbolDCE would leave the
+        // outlined GPU module with calls to an erased inline intrinsic.
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::createLowerQwenBlockDotPass());
+        pm.addPass(createQwenKFragAuditSnapshotPass("post_block_dot_lowering"));
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_block_dot_lowering"));
+        // Z9S is a compiler-only, structurally guarded load/commit fission.
+        // It is inert unless explicitly enabled and runs while raw-buffer
+        // packet values and their existing consumer loops remain visible.
+        pm.addNestedPass<mlir::func::FuncOp>(
+            causalflow::avelang::dialect::createBoundedPacketSchedulePass());
+        pm.addPass(createQwenKFragAuditSnapshotPass(
+            "post_bounded_packet_schedule"));
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_bounded_packet_schedule"));
         pm.addPass(createLinkIntrinsicImplementationPass());
         pm.addPass(::mlir::createCanonicalizerPass());
         pm.addPass(::mlir::createCSEPass());
@@ -183,10 +440,59 @@ class LowerToLLVM::Impl {
         // Add GPU outlining pass first to move kGlobalKernel functions to GPU
         // modules
         pm.addPass(createGpuOutliningPass());
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_gpu_outlining"));
+        if (isQwenKFragConvergenceAuditEnabled()) {
+            pm.addPass(createQwenKFragAuditSnapshotPass("post_gpu_outlining"));
+            pm.addPass(createQwenKFragAuditSnapshotPass(
+                "pre_block_dot_operand_materialization"));
+        }
+        // P2 consumes the internal generic block-dot operand plan only after
+        // outlining.  This is the semantic-preservation boundary: the
+        // logical role/layout/packed-word identity is still visible in the
+        // GPU module, immediately before target-specific LDS/MFMA materialization.
+        pm.addNestedPass<mlir::gpu::GPUModuleOp>(
+            causalflow::avelang::dialect::
+                createLowerQwenBlockDotMfmaOperandPass());
+        if (isQwenKFragConvergenceAuditEnabled()) {
+            pm.addPass(createQwenKFragAuditSnapshotPass(
+                "post_block_dot_operand_materialization"));
+        }
         pm.addNestedPass<mlir::gpu::GPUModuleOp>(
             ::mlir::createCanonicalizerPass());
         pm.addNestedPass<mlir::gpu::GPUModuleOp>(::mlir::createCSEPass());
         pm.addPass(::mlir::createSymbolDCEPass());
+        if (isQwenKFragConvergenceAuditEnabled()) {
+            pm.addPass(
+                createQwenKFragAuditSnapshotPass("post_outline_cleanup"));
+        }
+
+        // Keep ave.end_lifetime alive through AveLang->memref lowering and GPU
+        // outlining so the marker can be audited at a later phase. It is erased
+        // here because no real LLVM lifetime.end lowering is implemented yet,
+        // and the backend conversion pipeline does not legalize AveLang ops.
+        pm.addPass(createEraseAveLangEndLifetimePass());
+        // The producer/consumer rewrite keeps this guarded op through GPU
+        // outlining. Lower it here, after outlining but before the generic
+        // AMDGPU conversion pipeline, to avoid vector.load/GEP lowering.
+        pm.addNestedPass<mlir::gpu::GPUModuleOp>(
+            causalflow::avelang::dialect::createLowerQwenKFragLDSPass());
+        // S0 keeps the K64 stage token opaque until this post-outline point.
+        // It must not become a generic vector.load/memref.store chain before
+        // the distributed load placement has been selected.
+        pm.addPass(createQwenKFragAuditSnapshotPass(
+            "pre_k64_pipeline_stage_lowering"));
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "pre_joint_v1_stage_lowering"));
+        pm.addNestedPass<mlir::gpu::GPUModuleOp>(
+            causalflow::avelang::dialect::createLowerQwenK64PipelineStagePass());
+        pm.addPass(
+            createQwenKFragAuditSnapshotPass("post_kfrag_load_lowering"));
+        pm.addPass(createQwenPersistentRecurrenceSnapshotPass(
+            "post_joint_v1_stage_lowering"));
+        if (isQwenKFragConvergenceAuditEnabled()) {
+            pm.addPass(createQwenKFragAuditSnapshotPass("post_late_lowering"));
+        }
 
         // Propagate data layout to GPU modules
         auto propagateDataLayoutPass = [&](::mlir::Operation *op) {
@@ -211,16 +517,32 @@ class LowerToLLVM::Impl {
         }
 
         backend->buildLoweringPipeline(pm, options);
+        if (isQwenKFragConvergenceAuditEnabled()) {
+            pm.addPass(
+                createQwenKFragAuditSnapshotPass("post_amdgpu_mlir_pipeline"));
+        }
 
         pm.addPass(::mlir::createFinalizeMemRefToLLVMConversionPass());
 
         pm.addPass(::mlir::createCanonicalizerPass());
         pm.addPass(::mlir::createCSEPass());
+        pm.addPass(createQwenKFragAuditSnapshotPass("final_mlir"));
 
         pm.addPass(::mlir::createReconcileUnrealizedCastsPass());
 
         pm.addPass(::mlir::createCanonicalizerPass());
         pm.addPass(::mlir::createCSEPass());
+
+        // The late GPU/LLVM conversion pipeline can fail after all of the
+        // regular audit snapshots have been written.  Keep a narrow,
+        // opt-in failure dump so backend experiments can identify the
+        // failing pass without changing the normal pipeline or its IR.
+        if (llvm::sys::Process::GetEnv("AVELANG_DEBUG_MLIR_PASS_FAILURE")) {
+            pm.enableIRPrinting(
+                [](Pass *, Operation *) { return false; },
+                [](Pass *, Operation *) { return true; }, true, false, true,
+                llvm::errs());
+        }
 
         if (failed(pm.run(module))) {
             llvm::errs() << "Pass manager failed for triple " << targetTriple
@@ -244,6 +566,9 @@ class LowerToLLVM::Impl {
         if (!llvmModule) {
             return nullptr;
         }
+
+        writeQwenKFragAuditLLVM(*llvmModule, "preopt_llvm");
+        writeQwenPersistentRecurrenceLLVM(*llvmModule, "preopt_llvm");
 
         // Configure the LLVM module with correct target triple and data layout
         llvmModule->setTargetTriple(llvm::Triple(targetTriple));
@@ -284,8 +609,27 @@ class LowerToLLVM::Impl {
             tuningOptions.LoopVectorization = true;
             tuningOptions.SLPVectorization = true;
 
+            std::optional<llvm::PassInstrumentationCallbacks> instrumentation;
+            unsigned llvmPassOrdinal = 0;
+            if (isQwenKFragConvergenceAuditEnabled()) {
+                instrumentation.emplace();
+                instrumentation->registerAfterPassCallback(
+                    [&llvmPassOrdinal](llvm::StringRef passName, llvm::Any ir,
+                                       const llvm::PreservedAnalyses &) {
+                        auto modulePtr =
+                            llvm::any_cast<const llvm::Module *>(&ir);
+                        if (!modulePtr || !*modulePtr) {
+                            return;
+                        }
+                        const auto phase =
+                            "llvm_pass_" + std::to_string(llvmPassOrdinal++) +
+                            "_" + qwenKFragAuditSafePassName(passName);
+                        writeQwenKFragAuditLLVM(**modulePtr, phase);
+                    });
+            }
             llvm::PassBuilder pb(targetMachine.get(), tuningOptions,
-                                 std::nullopt, nullptr);
+                                 std::nullopt,
+                                 instrumentation ? &*instrumentation : nullptr);
 
             llvm::LoopAnalysisManager lam;
             llvm::FunctionAnalysisManager fam;
@@ -303,6 +647,9 @@ class LowerToLLVM::Impl {
 
             mpm.run(*llvmModule, mam);
         }
+
+        writeQwenKFragAuditLLVM(*llvmModule, "postopt_llvm");
+        writeQwenPersistentRecurrenceLLVM(*llvmModule, "postopt_llvm");
 
         return llvmModule;
     }

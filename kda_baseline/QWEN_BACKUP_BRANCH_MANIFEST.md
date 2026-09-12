@@ -2,6 +2,9 @@
 
 > 本文件是完整迁移的第一步：只记录新独立备份分支的迁移范围和审计结果。
 > 本轮不创建分支、不 `git add`、不 commit、不 push，也不修改任何 Qwen/KDA 实现。
+>
+> 前 1--7 节保留最初清单阶段的历史快照；后续补充和当前归档状态见第 8--9 节，
+> 以 `QWEN_KDA_RECOVERY_README.md` 及各 SHA-256 manifest 为当前恢复入口。
 
 ## 1. 迁移目标
 
@@ -182,7 +185,7 @@ origin  https://github.com/causalflow-ai/avelang.git
    创建本地迁移 commit；已完成，主 commit 为 `3fde826`。
 5. **推送并验证恢复**：push 新分支到 `myfork`，再用临时目录做一次 clone/文件/hash
    验证，最后再处理 Codex 聊天记录归档；代码/环境迁移已完成，Codex 聊天记录仍
-   单独保留为后续归档项。
+   单独保留为后续归档项（这是当时的历史状态；当前归档已在第 9 节纳入）。
 
 第 2 步已生成：
 
@@ -203,11 +206,12 @@ origin  https://github.com/causalflow-ai/avelang.git
 截至 Step 4：备份分支已创建为 `backup/qwen-kda-repro-2026-09`；原 64 个
 allowlist 新增文件、4 个迁移元数据文件，以及上面列出的 KDA/容器文件和 hash
 已暂存。allowlist 中另外 23 个文件原本已在当前 HEAD，因此在分支工作树中已经
-存在，不产生新的 staged diff。现有 19 个 modified tracked 文件仍未暂存；
-`QWEN_UPLOAD_INVENTORY.md` 仍保持未跟踪且未纳入，这是有意排除的旧规划文档，不是
-迁移遗漏。主迁移 commit 为 `3fde826`，状态 commit 为 `c6e3172`；远端最终 HEAD
-为 `c6e31721535bca08d47f159b9633cb54d1592047`。临时 clone 已完成 hash、语法、
-关键入口和容器 metadata 验证并删除；当前**未删除或移动项目文件，也未修改 Docker**。
+存在，不产生新的 staged diff。该阶段的 19 个 modified tracked 文件随后作为
+compiler source snapshot 纳入；`QWEN_UPLOAD_INVENTORY.md` 也在后续补充中纳入，
+用于保留早期迁移规划。主迁移 commit 为 `3fde826`，状态 commit 为 `c6e3172`；
+远端最终 HEAD 为 `c6e31721535bca08d47f159b9633cb54d1592047`。临时 clone 已完成
+hash、语法、关键入口和容器 metadata 验证并删除；当前**未删除或移动项目文件，
+也未修改 Docker**。
 
 ## 8. 历史演练源码/报告补充归档
 
@@ -224,3 +228,22 @@ allowlist 新增文件、4 个迁移元数据文件，以及上面列出的 KDA/
 IR/MIR/ISA/machine 生成物明确不上传；这些内容后续可按脚本重新生成。Z5B 的
 15 个本地 Python import-closure、发布入口、bench/test、提交清单和集成报告均
 已包含，源码恢复闭包完整；Z5B 的生成 HSACO 仍需在新主机重建。
+
+## 9. 后续源码/报告补充与 Codex 归档
+
+在原 87 个核心文件和 751 个 v10--v31 历史文件基础上，后续补充又纳入：
+
+- 413 个可读的 Qwen v3--v9、Stage 6/7、persistent-recurrence 源码、测试和报告；
+- `test/examples/doc/` 下的完整学习复盘及阶段原始报告附录；
+- 45 个当前 Avelang 编译器源码/测试快照（19 个修改文件、26 个新增文件）。
+
+补充源码的逐文件范围和 hash 见：
+
+- `QWEN_SOURCE_REPORT_SUPPLEMENT.md`
+- `QWEN_SUPPLEMENT_SHA256.txt`
+
+性能采样、模型权重、HSACO/对象文件、机器生成 IR/ISA 和 `_avelang_bindings*.so`
+仍然不上传；第三方官方仓库和 Docker 镜像仍按 README 中的 commit/digest 重建。
+
+Codex 会话记录另以脱敏、分片压缩包保存；README 记录归档文件名、SHA-256、
+来源目录和恢复命令。压缩包不包含 `auth.json`、SQLite 状态库或未脱敏 token。

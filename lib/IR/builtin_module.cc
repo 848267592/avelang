@@ -698,6 +698,22 @@ void AveLangModule::Initialize() {
             return CreateViewFunction(call_expr, gen_ctx, resolved_args);
         });
 
+    AddFunction(
+        "end_lifetime",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateEndLifetimeFunction(call_expr, gen_ctx,
+                                             resolved_args);
+        });
+
+    AddFunction(
+        "discard",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateEndLifetimeFunction(call_expr, gen_ctx,
+                                             resolved_args);
+        });
+
     // Mirror Python package structure: expose DSL constructs under
     // avelang.language in addition to the root module.
     AddModule("language", this);
@@ -2038,6 +2054,46 @@ mlir::Value AveLangModule::CreateViewFunction(
     }
 
     return castOp.getResult();
+}
+
+mlir::Value AveLangModule::CreateEndLifetimeFunction(
+    ast::Call *call_expr, GeneratorContext *ctx,
+    llvm::ArrayRef<mlir::Value> resolved_args) const {
+    auto location = GetCallLocation(ctx, call_expr);
+    auto &builder = ctx->GetCurrentFunctionGenerator()->GetBuilder();
+
+    const auto &args = call_expr->GetArgs();
+    if (args.empty()) {
+        ctx->diagnostic_manager->Report(basic::DiagnosticCode::kUnimplemented,
+                                        call_expr->GetSourceRange().getBegin())
+            << "end_lifetime() expects at least one argument";
+        return nullptr;
+    }
+
+    if (resolved_args.size() != args.size()) {
+        ctx->diagnostic_manager->Report(basic::DiagnosticCode::kUnimplemented,
+                                        call_expr->GetSourceRange().getBegin())
+            << "Failed to resolve end_lifetime() arguments";
+        return nullptr;
+    }
+
+    llvm::SmallVector<mlir::Value> values;
+    values.reserve(resolved_args.size());
+    for (auto value : resolved_args) {
+        if (!value) {
+            ctx->diagnostic_manager->Report(
+                basic::DiagnosticCode::kUnimplemented,
+                call_expr->GetSourceRange().getBegin())
+                << "end_lifetime() arguments must be runtime values";
+            return nullptr;
+        }
+        values.push_back(value);
+    }
+
+    cf::EndLifetimeOp::create(builder, location, values);
+    return ctx->GetCurrentFunctionGenerator()
+        ->GetExprGenerator()
+        ->CreateVoidValue();
 }
 
 } // namespace causalflow::avelang::ir

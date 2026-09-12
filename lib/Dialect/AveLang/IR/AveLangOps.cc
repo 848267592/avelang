@@ -1,6 +1,7 @@
 #include "AveLangOps.h"
 #include "AveLangDialect.h"
 #include "IR/Intrinsics/amdgpu_mfma_signatures.h"
+#include <mlir/Dialect/GPU/IR/GPUDialect.h>
 #include <mlir/Dialect/LLVMIR/LLVMDialect.h>
 #include <mlir/Dialect/Ptr/IR/PtrTypes.h>
 #include <mlir/Dialect/Vector/IR/VectorOps.h>
@@ -604,6 +605,591 @@ mlir::LogicalResult AMDGPURawBufferStoreOp::verify() {
     return mlir::success();
 }
 
+//===----------------------------------------------------------------------===//
+// AMDGPUQwenUpdateKFragLoadOp
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult AMDGPUQwenUpdateKFragLoadOp::verify() {
+    auto resultType = mlir::dyn_cast<mlir::VectorType>(getResult().getType());
+
+    auto getShape = [](mlir::Type type) -> llvm::ArrayRef<int64_t> {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getShape();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getShape();
+        }
+        return {};
+    };
+    auto getElementType = [](mlir::Type type) -> mlir::Type {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getElementType();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getElementType();
+        }
+        return {};
+    };
+    auto getMemorySpace = [](mlir::Type type) -> mlir::Attribute {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getMemorySpace();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getMemorySpace();
+        }
+        return {};
+    };
+
+    if (getShape(getSharedK().getType()) !=
+            llvm::ArrayRef<int64_t>({128, 64}) ||
+        !getElementType(getSharedK().getType()).isBF16()) {
+        return emitOpError("shared K must be BF16 [128,64]");
+    }
+    auto sharedSpace = mlir::dyn_cast_or_null<mlir::gpu::AddressSpaceAttr>(
+        getMemorySpace(getSharedK().getType()));
+    if (!sharedSpace ||
+        sharedSpace.getValue() != mlir::gpu::AddressSpace::Workgroup) {
+        return emitOpError("shared K must use workgroup memory");
+    }
+    auto sourceShape = getShape(getSourceK().getType());
+    if (sourceShape.size() != 4 || sourceShape[0] != 1 || sourceShape[1] < 64 ||
+        sourceShape[2] != 4 || sourceShape[3] != 128 ||
+        !getElementType(getSourceK().getType()).isBF16()) {
+        return emitOpError("source K must be BF16 [1,T,4,128] with T >= 64");
+    }
+    if (!resultType || resultType.getRank() != 1 ||
+        resultType.getNumElements() != 4 ||
+        !resultType.getElementType().isBF16()) {
+        return emitOpError("result must be vector<4xbf16>");
+    }
+    for (auto value : {getThreadId(), getKeyHead(), getTokenWindowBase(),
+                       getKColumn(), getTokenFragmentBase()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("index operands must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPUQwenUpdateKFragLDSLoadOp
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult AMDGPUQwenUpdateKFragLDSLoadOp::verify() {
+    auto resultType = mlir::dyn_cast<mlir::VectorType>(getResult().getType());
+    if (!resultType || resultType.getRank() != 1 ||
+        resultType.getNumElements() != 4 ||
+        !resultType.getElementType().isBF16()) {
+        return emitOpError("result must be vector<4xbf16>");
+    }
+    for (auto value :
+         {getSharedBase(), getKColumn(), getTokenFragmentLocalBase()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("address operands must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPUBlockDotBF16F32Op
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult AMDGPUBlockDotBF16F32Op::verify() {
+    auto getShape = [](mlir::Type type) -> llvm::ArrayRef<int64_t> {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getShape();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getShape();
+        }
+        return {};
+    };
+    auto getElementType = [](mlir::Type type) -> mlir::Type {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getElementType();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getElementType();
+        }
+        return {};
+    };
+    auto getMemorySpace = [](mlir::Type type) -> mlir::Attribute {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getMemorySpace();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getMemorySpace();
+        }
+        return {};
+    };
+    auto isWorkgroupBF16 = [&](mlir::Value value,
+                               llvm::ArrayRef<int64_t> shape) {
+        auto space = mlir::dyn_cast_or_null<mlir::gpu::AddressSpaceAttr>(
+            getMemorySpace(value.getType()));
+        return getShape(value.getType()) == shape &&
+               getElementType(value.getType()).isBF16() && space &&
+               space.getValue() == mlir::gpu::AddressSpace::Workgroup;
+    };
+    if (getOperation()->hasAttr("avelang.block_dot.operand_mode")) {
+        auto isOperandBlock = [&](mlir::Value value) {
+            auto shape = getShape(value.getType());
+            auto space = mlir::dyn_cast_or_null<mlir::gpu::AddressSpaceAttr>(
+                getMemorySpace(value.getType()));
+            return shape.size() == 2 && shape[0] >= 32 && shape[1] >= 32 &&
+                   getElementType(value.getType()).isBF16() && space &&
+                   space.getValue() == mlir::gpu::AddressSpace::Workgroup;
+        };
+        if (!isOperandBlock(getAStage()) || !isOperandBlock(getBStage())) {
+            return emitOpError("operand mode expects workgroup BF16 rank-2 "
+                               "logical A/B blocks with at least 32 elements");
+        }
+        auto resultType = mlir::dyn_cast<mlir::VectorType>(getResult().getType());
+        if (!resultType || resultType.getRank() != 1 ||
+            resultType.getNumElements() != 32 ||
+            !resultType.getElementType().isF32()) {
+            return emitOpError("operand mode result must be vector<32xf32>");
+        }
+        for (auto value : {getThreadId(), getChunkStart(), getValueHead(),
+                           getKeyHead(), getValueBase(), getKHalf()}) {
+            if (!value.getType().isIntOrIndex()) {
+                return emitOpError("operand mode index operands must be integer "
+                                   "or index");
+            }
+        }
+        if (!getGLast().getType().isF32()) {
+            return emitOpError("operand mode g_last must be f32");
+        }
+        for (auto accumulator : {getAccLow(), getAccHigh()}) {
+            auto type = accumulator.getType();
+            auto vectorType = mlir::dyn_cast<mlir::VectorType>(type);
+            const bool isVector = vectorType && vectorType.getRank() == 1 &&
+                                  vectorType.getNumElements() == 16 &&
+                                  vectorType.getElementType().isF32();
+            const bool isMemRef = getShape(type) ==
+                                      llvm::ArrayRef<int64_t>({16}) &&
+                                  getElementType(type).isF32();
+            if (!isVector && !isMemRef) {
+                return emitOpError("operand mode accumulators must be "
+                                   "vector<16xf32> or local F32 [16]");
+            }
+        }
+        return mlir::success();
+    }
+    const bool isIndependentA = isWorkgroupBF16(getAStage(), {2, 32, 32});
+    const bool isCooperativeA = isWorkgroupBF16(getAStage(), {1, 32, 32});
+    const bool isStagedA = isWorkgroupBF16(getAStage(), {1, 32, 64});
+    const bool isRegularB = isWorkgroupBF16(getBStage(), {32, 32});
+    const bool isStagedB = isWorkgroupBF16(getBStage(), {64, 64});
+    const bool isPreloadedB =
+        getOperation()->hasAttr("avelang.block_dot.preloaded_k") &&
+        isWorkgroupBF16(getBStage(), {2, 64, 64});
+    if ((!isIndependentA && !isCooperativeA && !isStagedA) ||
+        (!isRegularB && !isStagedB && !isPreloadedB) ||
+        (isStagedA != (isStagedB || isPreloadedB))) {
+        return emitOpError("expects workgroup BF16 A=[2,32,32] or cooperative "
+                           "A=[1,32,32] and B=[32,32] staging; staged V-decay "
+                           "uses A=[1,32,64] with B=[64,64] or preloaded K=[2,64,64]");
+    }
+    auto kShape = getShape(getSourceK().getType());
+    auto vShape = getShape(getSourceVNew().getType());
+    auto gShape = getShape(getSourceG().getType());
+    const auto sourceRole = getOperation()->getAttrOfType<mlir::StringAttr>(
+        "avelang.block_dot.source_role");
+    const bool c18VSource = sourceRole && sourceRole.getValue() == "V" &&
+                            getSourceK() == getSourceVNew();
+    const bool c19QSource = sourceRole && sourceRole.getValue() == "Q" &&
+                            getSourceK() == getSourceVNew();
+    if ((!c18VSource && !c19QSource &&
+         (kShape.size() != 4 || kShape[0] != 1 || kShape[1] < 64 ||
+          kShape[2] != 4 || kShape[3] != 128)) ||
+        !getElementType(getSourceK().getType()).isBF16()) {
+        return emitOpError("source K must be BF16 [1,T,4,128] with T >= 64");
+    }
+    if (!c19QSource &&
+        (vShape.size() != 4 || vShape[0] != 1 || vShape[1] < 64 ||
+        vShape[2] != 8 || vShape[3] != 128 ||
+        !getElementType(getSourceVNew().getType()).isBF16())) {
+        return emitOpError(
+            "source V-new must be BF16 [1,T,8,128] with T >= 64");
+    }
+    if (gShape.size() != 3 || gShape[0] != 1 || gShape[1] < 64 ||
+        gShape[2] != 8 || !getElementType(getSourceG().getType()).isF32()) {
+        return emitOpError("source G must be FP32 [1,T,8] with T >= 64");
+    }
+    auto resultType = mlir::dyn_cast<mlir::VectorType>(getResult().getType());
+    if (!resultType || resultType.getRank() != 1 ||
+        resultType.getNumElements() != 32 ||
+        !resultType.getElementType().isF32()) {
+        return emitOpError("result must be vector<32xf32>");
+    }
+    for (auto value : {getThreadId(), getChunkStart(), getValueHead(),
+                       getKeyHead(), getValueBase(), getKHalf()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("index operands must be integer or index");
+        }
+    }
+    if (!getGLast().getType().isF32()) {
+        return emitOpError("g_last must be f32");
+    }
+    for (auto accumulator : {getAccLow(), getAccHigh()}) {
+        auto type = accumulator.getType();
+        auto isVector = [&](mlir::Type valueType) {
+            auto vectorType = mlir::dyn_cast<mlir::VectorType>(valueType);
+            return vectorType && vectorType.getRank() == 1 &&
+                   vectorType.getNumElements() == 16 &&
+                   vectorType.getElementType().isF32();
+        };
+        auto isMemRef = [&](mlir::Type valueType) {
+            return getShape(valueType) == llvm::ArrayRef<int64_t>({16}) &&
+                   getElementType(valueType).isF32();
+        };
+        if (!isVector(type) && !isMemRef(type)) {
+            return emitOpError("persistent accumulators must be vector<16xf32> "
+                               "or F32 [16] local storage");
+        }
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPUQwenGdnRecurrenceStepBF16F32Op
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult AMDGPUQwenGdnRecurrenceStepBF16F32Op::verify() {
+    auto getShape = [](mlir::Type type) -> llvm::ArrayRef<int64_t> {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getShape();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getShape();
+        }
+        return {};
+    };
+    auto getElementType = [](mlir::Type type) -> mlir::Type {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getElementType();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getElementType();
+        }
+        return {};
+    };
+    auto getMemorySpace = [](mlir::Type type) -> mlir::Attribute {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getMemorySpace();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getMemorySpace();
+        }
+        return {};
+    };
+    auto isWorkgroup = [&](mlir::Value value, llvm::ArrayRef<int64_t> shape,
+                           mlir::Type element) {
+        auto space = mlir::dyn_cast_or_null<mlir::gpu::AddressSpaceAttr>(
+            getMemorySpace(value.getType()));
+        return getShape(value.getType()) == shape &&
+               getElementType(value.getType()) == element && space &&
+               space.getValue() == mlir::gpu::AddressSpace::Workgroup;
+    };
+    auto *context = getContext();
+    if (!isWorkgroup(getStateStage(), {2, 32, 64},
+                     mlir::BFloat16Type::get(context))) {
+        return emitOpError("stateStage must be workgroup BF16 [2,32,64]");
+    }
+    if (!isWorkgroup(getPhaseStage(), {64, 64},
+                     mlir::BFloat16Type::get(context)) ||
+        !isWorkgroup(getPredPartial(), {2, 32, 32},
+                     mlir::Float32Type::get(context)) ||
+        !isWorkgroup(getVdecayStage(), {1, 32, 32},
+                     mlir::BFloat16Type::get(context))) {
+        return emitOpError("requires phase=[64,64] BF16, pred=[2,32,32] F32 "
+                           "and vdecay=[1,32,32] BF16 workgroup buffers");
+    }
+    auto vector16F32 = [](mlir::Type type) {
+        auto vectorType = mlir::dyn_cast<mlir::VectorType>(type);
+        return vectorType && vectorType.getRank() == 1 &&
+               vectorType.getNumElements() == 16 &&
+               vectorType.getElementType().isF32();
+    };
+    auto local16F32 = [&](mlir::Type type) {
+        return getShape(type) == llvm::ArrayRef<int64_t>({16}) &&
+               getElementType(type).isF32();
+    };
+    auto vector32F32 = [](mlir::Type type) {
+        auto vectorType = mlir::dyn_cast<mlir::VectorType>(type);
+        return vectorType && vectorType.getRank() == 1 &&
+               vectorType.getNumElements() == 32 &&
+               vectorType.getElementType().isF32();
+    };
+    if ((!vector16F32(getStateLow().getType()) &&
+         !local16F32(getStateLow().getType())) ||
+        (!vector16F32(getStateHigh().getType()) &&
+         !local16F32(getStateHigh().getType())) ||
+        !vector32F32(getResult().getType())) {
+        return emitOpError("state operands must be vector<16xf32> or local "
+                           "FP32 [16], and result must be vector<32xf32>");
+    }
+    for (auto value : {getThreadId(), getChunkIndex(), getValueHead(),
+                       getKeyHead(), getValueBase()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError(
+                "thread/chunk/head/index operands must be integer "
+                "or index");
+        }
+    }
+    if (!getEmitAudit().getType().isInteger(1)) {
+        return emitOpError("emitAudit must be i1");
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPUQwenPersistentRecurrenceOp
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult AMDGPUQwenPersistentRecurrenceOp::verify() {
+    if (!getNumChunks().getType().isIntOrIndex()) {
+        return emitOpError("num_chunks must be integer or index");
+    }
+    if (!getEmitAudit().getType().isInteger(1)) {
+        return emitOpError("emit_audit must be i1");
+    }
+    const bool frontendMarker = getOperation()->hasAttr(
+        "avelang.qwen.persistent_recurrence.frontend_marker");
+    if (getBody().empty() || !llvm::hasSingleElement(getBody())) {
+        return emitOpError("must have exactly one body block");
+    }
+    auto &body = getBody().front();
+    if (body.empty() ||
+        !mlir::isa<AMDGPUQwenPersistentRecurrenceYieldOp>(body.back())) {
+        return emitOpError("body must end in persistent recurrence yield");
+    }
+    if (frontendMarker && !llvm::hasSingleElement(body)) {
+        return emitOpError("frontend marker must contain only its yield");
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPUQwenKFragStageLoadOp
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult AMDGPUQwenKFragStageLoadOp::verify() {
+    auto getShape = [](mlir::Type type) -> llvm::ArrayRef<int64_t> {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getShape();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getShape();
+        }
+        return {};
+    };
+    auto getElementType = [](mlir::Type type) -> mlir::Type {
+        if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+            return aveType.getElementType();
+        }
+        if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+            return memrefType.getElementType();
+        }
+        return {};
+    };
+    auto sourceShape = getShape(getSourceK().getType());
+    if (sourceShape.size() != 4 || sourceShape[0] != 1 || sourceShape[1] < 64 ||
+        sourceShape[2] != 4 || sourceShape[3] != 128 ||
+        !getElementType(getSourceK().getType()).isBF16()) {
+        return emitOpError("source K must be BF16 [1,T,4,128] with T >= 64");
+    }
+    if (!getResult().getType().isBF16()) {
+        return emitOpError("result must be BF16");
+    }
+    for (auto value : {getSourceToken(), getKeyHead(), getKColumn()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("index operands must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPUQwenK64PipelineStageLoadOp / CommitOp
+//===----------------------------------------------------------------------===//
+
+namespace {
+
+llvm::ArrayRef<int64_t> getMemRefShape(mlir::Type type) {
+    if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+        return aveType.getShape();
+    }
+    if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+        return memrefType.getShape();
+    }
+    return {};
+}
+
+mlir::Type getMemRefElementType(mlir::Type type) {
+    if (auto aveType = mlir::dyn_cast<MemRefType>(type)) {
+        return aveType.getElementType();
+    }
+    if (auto memrefType = mlir::dyn_cast<mlir::MemRefType>(type)) {
+        return memrefType.getElementType();
+    }
+    return {};
+}
+
+} // namespace
+
+mlir::LogicalResult AMDGPUQwenK64PipelineStageLoadOp::verify() {
+    auto sourceShape = getMemRefShape(getSourceK().getType());
+    if (sourceShape.size() != 4 || sourceShape[0] != 1 || sourceShape[1] < 64 ||
+        (sourceShape[2] != 4 && sourceShape[2] != 8) || sourceShape[3] != 128 ||
+        !getMemRefElementType(getSourceK().getType()).isBF16()) {
+        return emitOpError("source operand must be BF16 [1,T,4|8,128] with T >= 64");
+    }
+    if (!getStageToken().getType().isInteger(64)) {
+        return emitOpError("opaque stage token must be i64");
+    }
+    for (auto value : {getThreadId(), getChunkStart(), getKeyHead(), getKHalf()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("thread/chunk/head/K-half operands must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+mlir::LogicalResult AMDGPUQwenK64PipelineStageCommitOp::verify() {
+    // The Python/JIT expression layer may insert a trivial integer wrapper
+    // around this opaque token. Its producer is therefore checked after GPU
+    // outlining by the late lowering pass, where the wrapper can be unwrapped
+    // without making the token frontend-addressable.
+    if (!getStageToken().getType().isInteger(64)) {
+        return emitOpError("opaque stage token must be i64");
+    }
+    auto shape = getMemRefShape(getSharedKBank().getType());
+    if (shape != llvm::ArrayRef<int64_t>({2, 64, 64}) ||
+        !getMemRefElementType(getSharedKBank().getType()).isBF16()) {
+        return emitOpError("shared W/K bank must be BF16 [2,64,64]");
+    }
+    // After AveLang-to-memref, workgroup space may be represented as the
+    // target's normalized integer address-space attribute. The source-facing
+    // intrinsic checker enforces workgroup memory before this conversion; do
+    // not reject the equivalent late representation here.
+    return mlir::success();
+}
+
+mlir::LogicalResult AMDGPUQwenK64CoreIssueOp::verify() {
+    auto sourceShape = getMemRefShape(getSourceK().getType());
+    if (sourceShape.size() != 4 || sourceShape[0] != 1 || sourceShape[1] < 64 ||
+        (sourceShape[2] != 4 && sourceShape[2] != 8) || sourceShape[3] != 128 ||
+        !getMemRefElementType(getSourceK().getType()).isBF16()) {
+        return emitOpError("source operand must be BF16 [1,T,4|8,128] with T >= 64");
+    }
+    auto packetType = mlir::dyn_cast<mlir::VectorType>(getPacket().getType());
+    if (!packetType || packetType.getRank() != 1 ||
+        packetType.getNumElements() != 8 || !packetType.getElementType().isBF16()) {
+        return emitOpError("packet must be vector<8xbf16>");
+    }
+    auto packetStart = getOperation()->getAttrOfType<mlir::IntegerAttr>(
+        "avelang.qwen.core_staggered.packet_start");
+    if (!packetStart || packetStart.getInt() < 0 || packetStart.getInt() >= 4) {
+        return emitOpError("requires core_staggered.packet_start in [0,4)");
+    }
+    for (auto value : {getThreadId(), getChunkStart(), getKeyHead(), getKHalf()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("thread/chunk/head/K-half operands must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+mlir::LogicalResult AMDGPUQwenK64CoreCommitOp::verify() {
+    auto packetType = mlir::dyn_cast<mlir::VectorType>(getPacket().getType());
+    if (!packetType || packetType.getRank() != 1 ||
+        packetType.getNumElements() != 8 || !packetType.getElementType().isBF16()) {
+        return emitOpError("packet must be vector<8xbf16>");
+    }
+    auto shape = getMemRefShape(getSharedKBank().getType());
+    if (shape != llvm::ArrayRef<int64_t>({2, 64, 64}) ||
+        !getMemRefElementType(getSharedKBank().getType()).isBF16()) {
+        return emitOpError("shared W/K bank must be BF16 [2,64,64]");
+    }
+    auto packetStart = getOperation()->getAttrOfType<mlir::IntegerAttr>(
+        "avelang.qwen.core_staggered.packet_start");
+    if (!packetStart || packetStart.getInt() < 0 || packetStart.getInt() >= 4) {
+        return emitOpError("requires core_staggered.packet_start in [0,4)");
+    }
+    for (auto value : {getThreadId(), getKHalf()}) {
+        if (!value.getType().isIntOrIndex()) {
+            return emitOpError("thread/K-half operands must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// AMDGPURegionPendingPacketIssueOp / CommitOp
+//===----------------------------------------------------------------------===//
+
+namespace {
+
+mlir::LogicalResult verifyPendingPacketType(mlir::Operation *operation,
+                                            mlir::Type type) {
+    auto packet = mlir::dyn_cast<mlir::VectorType>(type);
+    if (!packet || packet.getRank() != 1 || packet.getNumElements() != 8 ||
+        !packet.getElementType().isBF16()) {
+        return operation->emitOpError("packet must be vector<8xbf16>");
+    }
+    return mlir::success();
+}
+
+mlir::LogicalResult verifyPendingPacketIndices(mlir::Operation *operation,
+                                               mlir::Type memrefType,
+                                               mlir::OperandRange indices) {
+    const auto shape = getMemRefShape(memrefType);
+    if (shape.empty() || !getMemRefElementType(memrefType).isBF16()) {
+        return operation->emitOpError("memory operand must be a BF16 memref");
+    }
+    if (indices.size() != shape.size()) {
+        return operation->emitOpError("index count must match the memory rank");
+    }
+    for (auto index : indices) {
+        if (!index.getType().isIntOrIndex()) {
+            return operation->emitOpError("packet indices must be integer or index");
+        }
+    }
+    return mlir::success();
+}
+
+} // namespace
+
+mlir::LogicalResult AMDGPURegionPendingPacketIssueOp::verify() {
+    if (mlir::failed(verifyPendingPacketType(getOperation(), getPacket().getType()))) {
+        return mlir::failure();
+    }
+    if (!getPredicate().getType().isInteger(1)) {
+        return emitOpError("predicate must be i1");
+    }
+    return verifyPendingPacketIndices(getOperation(), getSource().getType(),
+                                      getIndices());
+}
+
+mlir::LogicalResult AMDGPURegionPendingPacketCommitOp::verify() {
+    if (mlir::failed(verifyPendingPacketType(getOperation(), getPacket().getType()))) {
+        return mlir::failure();
+    }
+    if (!getPredicate().getType().isInteger(1)) {
+        return emitOpError("predicate must be i1");
+    }
+    auto issue = mlir::dyn_cast_or_null<AMDGPURegionPendingPacketIssueOp>(
+        getPacket().getDefiningOp());
+    if (!issue || issue->getBlock() != getOperation()->getBlock()) {
+        return emitOpError(
+            "requires a direct same-block region_pending_packet_issue producer");
+    }
+    return verifyPendingPacketIndices(getOperation(), getDestination().getType(),
+                                      getIndices());
+}
+
 } // namespace causalflow::avelang::dialect
 
 // Include the generated definitions
@@ -722,6 +1308,25 @@ mlir::LogicalResult FullOp::verify() {
     }
 
     return mlir::success();
+}
+
+//===----------------------------------------------------------------------===//
+// EndLifetimeOp
+//===----------------------------------------------------------------------===//
+
+mlir::LogicalResult EndLifetimeOp::verify() {
+    if (getValues().empty()) {
+        return emitOpError("requires at least one operand");
+    }
+    return mlir::success();
+}
+
+void EndLifetimeOp::getEffects(
+    llvm::SmallVectorImpl<
+        mlir::SideEffects::EffectInstance<mlir::MemoryEffects::Effect>>
+        &effects) {
+    effects.emplace_back(mlir::MemoryEffects::Write::get(),
+                         mlir::SideEffects::DefaultResource::get());
 }
 
 } // namespace causalflow::avelang::dialect

@@ -1,9 +1,9 @@
 # Qwen GDN 历史演练源码与报告归档
 
-这是 `backup/qwen-kda-repro-2026-09` 的补充归档范围。它和
-`QWEN_BACKUP_BRANCH_ALLOWLIST.md` 中的 Stage 6S/X2+Z5B 最小运行时闭包同时
-存在：本文件负责保存整个 Qwen 演练过程，便于换服务器后复盘 v10--v31 的
-演进、实验假设和最终结论。
+这是 `backup/qwen-kda-repro-2026-09` 的第一段历史归档范围。它和
+`QWEN_BACKUP_BRANCH_ALLOWLIST.md` 中的 Stage 6S/X2+Z5B 最小运行时闭包、以及
+`QWEN_SOURCE_REPORT_SUPPLEMENT.md` 中的 v3--v9/Stage 6--7 补充同时存在：本文件
+负责保存 v10--v31 的演进、实验假设和最终结论。
 
 ## 纳入范围
 
@@ -42,7 +42,8 @@ X2+Z5B 集成报告和 `qwen_chunk_o_z5b_handoff/` 的源码/报告也在本次�
 等生成目录。它们可在新服务器按脚本重新生成，不影响演练逻辑复盘。
 
 `QWEN_BACKUP_SHA256.txt` 仍校验原来的核心 87 文件；本文件的
-`QWEN_HISTORY_SHA256.txt` 负责新增的历史源码/报告集合，二者不要互相替代。
+`QWEN_HISTORY_SHA256.txt` 负责 v10--v31 历史源码/报告集合；
+`QWEN_SUPPLEMENT_SHA256.txt` 负责后续补充，三者不要互相替代。
 个别 vLLM lowering snapshot 虽然文件名是 `source.py`，内容实际是 TTIR/MLIR
 文本且不能作为 Python 源码解析；它们也按生成工件排除。
 

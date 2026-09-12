@@ -21,12 +21,25 @@ class AveLangMemRefCastOp;
 class AveLangMemRefExtractAlignedPointerAsIndexOp;
 class AveLangMemRefSubViewOp;
 class FullOp;
+class EndLifetimeOp;
 class NVVMMMAOp;
 class NVVMLdMatrixOp;
 class NVVMStMatrixOp;
 class AMDGPUMfmaOp;
 class AMDGPURawBufferLoadOp;
 class AMDGPURawBufferStoreOp;
+class AMDGPUQwenUpdateKFragLoadOp;
+class AMDGPUQwenUpdateKFragLDSLoadOp;
+class AMDGPUQwenPredStateKVFragLoadOp;
+class AMDGPUBlockDotBF16F32Op;
+class AMDGPUBlockDotMfmaOperandOp;
+class AMDGPUQwenGdnRecurrenceStepBF16F32Op;
+class AMDGPUQwenPersistentRecurrenceOp;
+class AMDGPUQwenPersistentRecurrenceYieldOp;
+class AMDGPUQwenPersistentRecurrenceEndOp;
+class AMDGPUQwenKFragStageLoadOp;
+class AMDGPUQwenK64PipelineStageLoadOp;
+class AMDGPUQwenK64PipelineStageCommitOp;
 } // namespace causalflow::avelang::dialect
 
 // Include the generated declarations

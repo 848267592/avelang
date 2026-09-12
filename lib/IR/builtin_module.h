@@ -85,6 +85,9 @@ class AveLangModule : public NamedModule {
     mlir::Value
     CreateViewFunction(ast::Call *call_expr, GeneratorContext *ctx,
                        llvm::ArrayRef<mlir::Value> resolved_args) const;
+    mlir::Value
+    CreateEndLifetimeFunction(ast::Call *call_expr, GeneratorContext *ctx,
+                              llvm::ArrayRef<mlir::Value> resolved_args) const;
 
   private:
     IRContext *ir_context_;

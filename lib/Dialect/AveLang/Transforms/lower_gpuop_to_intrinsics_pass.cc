@@ -26,6 +26,7 @@
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
+#include <llvm/Support/Process.h>
 #include <llvm/Support/raw_ostream.h>
 #include <string>
 #include <string_view>
@@ -36,6 +37,24 @@ namespace causalflow::avelang::dialect {
 namespace amdgpu_mfma = causalflow::avelang::amdgpu::mfma;
 
 namespace {
+
+// ROCm raw-buffer loads have two different address operands: ``offset`` is a
+// VGPR-or-immediate value that participates in bounds checking and swizzling,
+// while ``soffset`` must be SGPR-or-immediate.  Older AveLang packet callers
+// often passed ``(0, lane_byte_offset)`` in the public ``(vindex, soffset)``
+// positions.  That is numerically valid only after AMDGPU serializes each
+// distinct lane offset through EXEC, which creates a readfirstlane/saveexec
+// waterfall.  Keep the legacy lowering as default; this opt-in generic packet
+// mode corrects the operand bank without introducing a domain-specific op.
+bool useWaterfallFreeRawBufferOffset() {
+    auto mode = llvm::sys::Process::GetEnv(
+        "AVELANG_STAGE6Z_PACKET_LOAD_LOWERING");
+    return mode && *mode == "waterfall_free";
+}
+
+bool isNonConstantValue(mlir::Value value) {
+    return !value.getDefiningOp<mlir::arith::ConstantOp>();
+}
 
 /// Helper to convert a memref to an aligned pointer index with optional bounds
 /// checking. Returns a null Value on failure and emits a diagnostic.
@@ -554,6 +573,22 @@ class AMDGPURawBufferLoadLowering
         auto soffset = op.getSoffset();
         auto aux = op.getAux();
         auto resultType = op.getResult().getType();
+
+        // Preserve the source operation and every logical address.  Raw MUBUF
+        // uses ``vindex + soffset`` as its effective byte address, but only
+        // the former may be a VGPR.  Lower stages may materialize a source
+        // literal zero through workgroup-local memory, so testing the vindex
+        // SSA for an arith.constant is not robust.  Instead, normalize the
+        // complete address into the VGPR-compatible operand and use a true
+        // immediate scalar offset.  This is valid for nonzero vindex callers
+        // too, and avoids scalar-bank waterfalls without introducing a
+        // domain-specific packet operation.
+        if (useWaterfallFreeRawBufferOffset() && isNonConstantValue(soffset)) {
+            vindex = rewriter.create<mlir::arith::AddIOp>(op.getLoc(), vindex,
+                                                           soffset);
+            soffset = rewriter.create<mlir::arith::ConstantIntOp>(
+                op.getLoc(), 0, 32);
+        }
 
         auto loadOp = mlir::ROCDL::RawBufferLoadOp::create(
             rewriter, op.getLoc(), resultType, rsrc, vindex, soffset, aux);

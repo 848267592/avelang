@@ -44,6 +44,8 @@ from .core import (
     log2,
     erf,
     sqrt,
+    end_lifetime,
+    discard,
 )
 
 __all__ = [
@@ -86,4 +88,6 @@ __all__ = [
     "log2",
     "erf",
     "sqrt",
+    "end_lifetime",
+    "discard",
 ]

@@ -10,13 +10,23 @@ set(LLVM_TARGET_DEFINITIONS AveLangTypes.td)
 mlir_tablegen(AveLangTypes.h.inc -gen-typedef-decls)
 mlir_tablegen(AveLangTypes.cpp.inc -gen-typedef-defs)
 
+# Static physical layout encodings are attributes, not ordinary memory-layout
+# types.  They are registered with the AveLang dialect but are not lowered by
+# this MVP.
+set(LLVM_TARGET_DEFINITIONS AveLangAttrs.td)
+mlir_tablegen(AveLangAttrs.h.inc -gen-attrdef-decls -attrdefs-dialect=ave)
+mlir_tablegen(AveLangAttrs.cpp.inc -gen-attrdef-defs -attrdefs-dialect=ave)
+
 add_public_tablegen_target(AveLangOpsIncGen)
 add_public_tablegen_target(AveLangTypesIncGen)
+add_public_tablegen_target(AveLangAttrsIncGen)
 
 add_library(ave-lang-dialect
     AveLangDialect.cc
     AveLangOps.cc
     AveLangTypes.cc
+    AveLangAttrs.cc
+    static_physical_layout.cc
 )
 ave_lang_disable_rtti_for_llvm(ave-lang-dialect)
 
@@ -25,7 +35,8 @@ target_include_directories(ave-lang-dialect PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-add_dependencies(ave-lang-dialect AveLangOpsIncGen AveLangTypesIncGen)
+add_dependencies(ave-lang-dialect AveLangOpsIncGen AveLangTypesIncGen
+                 AveLangAttrsIncGen)
 
 target_link_libraries(ave-lang-dialect
     MLIRIR
@@ -33,3 +44,17 @@ target_link_libraries(ave-lang-dialect
     MLIRPtrDialect
     MLIRSupport
 )
+
+add_executable(static_physical_layout_test static_physical_layout_test.cc)
+ave_lang_disable_rtti_for_llvm(static_physical_layout_test)
+target_link_libraries(static_physical_layout_test
+    ave-lang-dialect
+    ave-lang-dialect-transforms
+    MLIRParser
+    MLIRFuncDialect
+    MLIRPass
+    MLIRTransforms
+    MLIRGPUDialect
+    GTest::gtest_main
+)
+add_test(static_physical_layout_test static_physical_layout_test)

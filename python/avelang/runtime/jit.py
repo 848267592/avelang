@@ -243,8 +243,8 @@ class DependenciesFinder(ast.NodeVisitor):
         #         self.record_reference(attr)
         #     return
 
-        # if getattr(val, "__avelang_builtin__", False):
-        #     return
+        if getattr(val, "__avelang_builtin__", False):
+            return
 
         # # Stubs that aren't real functions
         # if getattr(val, "__module__", "") == "avelang.language.extra.libdevice":

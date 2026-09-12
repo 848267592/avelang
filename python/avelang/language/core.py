@@ -171,3 +171,17 @@ def erf(x):
 def sqrt(x):
     """Compute sqrt(x) for scalar GPU values."""
     pass
+
+
+def end_lifetime(*values):
+    """Mark GPU kernel values as no longer needed after this point."""
+    pass
+
+
+def discard(*values):
+    """Alias for end_lifetime used as an explicit discard marker."""
+    pass
+
+
+end_lifetime.__avelang_builtin__ = True
+discard.__avelang_builtin__ = True

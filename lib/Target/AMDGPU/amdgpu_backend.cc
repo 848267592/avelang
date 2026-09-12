@@ -4,6 +4,7 @@
 #include "gpu_to_amdgpu_pipeline.h"
 #include "rocm_installation_detector.h"
 #include <algorithm>
+#include <atomic>
 #include <clang/Driver/OffloadBundler.h>
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -15,6 +16,8 @@
 #include <llvm/Support/Error.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/Path.h>
+#include <llvm/Support/Process.h>
 #include <llvm/Support/Program.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
@@ -22,6 +25,7 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/TargetParser/TargetParser.h>
 #include <llvm/TargetParser/Triple.h>
+#include <llvm/ADT/SmallString.h>
 #include <map>
 #include <mutex>
 #include <sstream>
@@ -203,6 +207,17 @@ llvm::Expected<std::string> AMDGPUBackend::generateBinary(
     // internalized and inlined into the kernel before final codegen.
     auto linkBitcodeWithClang =
         [&](const std::string &bitcode) -> llvm::Expected<std::string> {
+        static std::atomic<uint64_t> debugSequence{0};
+        const auto debugDir = llvm::sys::Process::GetEnv(
+            "AVELANG_AMDGPU_LINK_DEBUG_DIR");
+        const uint64_t debugId = debugSequence.fetch_add(1);
+        auto debugPath = [&](llvm::StringRef suffix) {
+            llvm::SmallString<256> path(debugDir.value_or(""));
+            llvm::sys::path::append(
+                path, "amdgpu-link-" + std::to_string(debugId) +
+                          suffix.str());
+            return path;
+        };
         auto inputTempFile =
             llvm::sys::fs::TempFile::create("/tmp/kernel-%%%%%%.bc");
         if (!inputTempFile) {
@@ -231,6 +246,24 @@ llvm::Expected<std::string> AMDGPUBackend::generateBinary(
 
         std::string inputFilePath = inputTempFile->TmpName;
         std::string outFilePath = outTempFile->TmpName;
+
+        if (debugDir) {
+            std::error_code ec = llvm::sys::fs::create_directories(*debugDir);
+            if (ec) {
+                llvm::errs() << "[avelang-amdgpu-debug] cannot create "
+                             << *debugDir << ": " << ec.message() << "\n";
+            } else {
+                std::error_code writeEc;
+                llvm::raw_fd_ostream debugInput(debugPath(".prelink.bc"),
+                                                 writeEc);
+                if (writeEc) {
+                    llvm::errs() << "[avelang-amdgpu-debug] cannot write prelink bitcode: "
+                                 << writeEc.message() << "\n";
+                } else {
+                    debugInput.write(bitcode.data(), bitcode.size());
+                }
+            }
+        }
 
         // Prepare ld.lld command using ROCm device library discovery similar to
         // clang
@@ -327,6 +360,27 @@ llvm::Expected<std::string> AMDGPUBackend::generateBinary(
                           " (exit code " + std::to_string(result) + ")";
             return llvm::createStringError(llvm::inconvertibleErrorCode(),
                                            errorDetail);
+        }
+
+        if (debugDir) {
+            std::error_code copyEc = llvm::sys::fs::copy_file(
+                outFilePath, debugPath(".linked.out"));
+            if (copyEc) {
+                llvm::errs() << "[avelang-amdgpu-debug] cannot copy linked output: "
+                             << copyEc.message() << "\n";
+            }
+            std::error_code argvEc;
+            llvm::raw_fd_ostream argvOS(debugPath(".argv.txt"), argvEc);
+            if (!argvEc) {
+                for (const auto &arg : args) {
+                    // Make the recorded command replayable after the temp
+                    // input is discarded.
+                    argvOS << (arg == inputFilePath
+                                   ? debugPath(".prelink.bc").str()
+                                   : arg)
+                           << '\n';
+                }
+            }
         }
 
         // Read the linked output

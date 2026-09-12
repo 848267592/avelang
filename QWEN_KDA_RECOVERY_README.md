@@ -21,8 +21,9 @@ a copy of the official SGLang/vLLM/AITER source trees.
 
 The last recovery test cloned this branch into a temporary directory, verified
 the core 87 Qwen files and 22 KDA/container files by SHA-256. The historical
-archive adds 751 Qwen source/report files; its separate SHA-256 manifest is
-checked independently. The recovery test also parsed the selected
+archive adds 751 Qwen source/report files, and the later source/report
+supplement adds 413 more; their separate SHA-256 manifests are checked
+independently. The recovery test also parsed the selected
 Python/JSON/JSONL files, checked shell syntax, and removed the temporary clone.
 
 ## Safety rules
@@ -76,21 +77,27 @@ awk 'NF == 2 && $1 ~ /^[[:xdigit:]]{64}$/ {print}' \
   kda_baseline/KDA_BACKUP_SHA256.txt | sha256sum -c -
 
 grep -E '^[0-9a-f]{64}  ' kda_baseline/QWEN_HISTORY_SHA256.txt | sha256sum -c -
+
+grep -E '^[0-9a-f]{64}  ' kda_baseline/QWEN_SUPPLEMENT_SHA256.txt | sha256sum -c -
 ~~~
 
 Expected counts are 87 core Qwen/full-graph files, 751 historical
-source/report files, and 22 KDA/container reference files. The authoritative
+source/report files, 413 additional source/report files, and 22 KDA/container
+reference files. The authoritative
 scope documents are:
 
 - kda_baseline/QWEN_BACKUP_BRANCH_ALLOWLIST.md
 - kda_baseline/QWEN_HISTORY_ALLOWLIST.md
 - kda_baseline/QWEN_HISTORY_SHA256.txt
+- kda_baseline/QWEN_SOURCE_REPORT_SUPPLEMENT.md
+- kda_baseline/QWEN_SUPPLEMENT_SHA256.txt
 - kda_baseline/QWEN_BACKUP_BRANCH_MANIFEST.md
 - kda_baseline/QWEN_REBUILD_ENV.md
 - kda_baseline/KDA_BACKUP_SHA256.txt
 
-The old kda_baseline/QWEN_UPLOAD_INVENTORY.md is intentionally not part of
-the recovery branch; the new manifest and allowlist supersede it.
+The early `kda_baseline/QWEN_UPLOAD_INVENTORY.md` is included in the 413-file
+supplement as a historical migration-planning record. The manifests and
+allowlists remain authoritative for the exact recovery scope.
 
 ## 3. Re-download the pinned official sources
 
@@ -277,21 +284,28 @@ model weights from the old host.
 
 ### Historical Qwen source/report archive
 
-The complete v10--v31 experiment trail is an additional source-and-report
-archive, not a performance-data dump:
+The v10--v31 experiment trail is an additional source-and-report archive, and
+the supplement below completes the readable early-version and Stage 6/7
+source/report trail. Neither archive is a performance-data dump:
 
 ~~~text
 kda_baseline/QWEN_HISTORY_ALLOWLIST.md
 kda_baseline/QWEN_HISTORY_SHA256.txt
+kda_baseline/QWEN_SOURCE_REPORT_SUPPLEMENT.md
+kda_baseline/QWEN_SUPPLEMENT_SHA256.txt
 test/examples/linear_attention/vllm_compare/  # selected v10--v31 files
 test/examples/linear_attention/compile_bug/qwen_mfma32_lowering_ladder/
+test/examples/doc/  # Qwen learning/review appendices
+test/examples/linear_attention/doc/  # final review reports
 ~~~
 
-It intentionally excludes profiler sessions, sampled CSV/JSON results, tensor
-dumps, HSACO/object files, and compiler machine/ISA/IR output. Read the history
-allowlist when reconstructing the progression from v10/v11 through v31; use the
-X2+Z5B entry and reports as the current long-sequence candidate, not as a
-claim that every historical version is production-ready.
+The supplement includes the readable v3--v9 implementations, early references,
+Stage 6/7 scripts, persistent-recurrence reports, and the complete Qwen learning
+review documents that were present on the host. It intentionally excludes
+profiler sessions, sampled CSV/JSON results, tensor dumps, HSACO/object files,
+and compiler machine/ISA/IR output. Read both allowlists when reconstructing
+the progression; use the X2+Z5B entry and reports as the current long-sequence
+candidate, not as a claim that every historical version is production-ready.
 
 ### KDA reference and benchmark files
 
@@ -328,7 +342,8 @@ third_party/vllm/vllm/models/kimi_k3/amd/ops/third_party/kda/fused_recurrent.py
 
 ## 9. Recovery order for an agent
 
-1. Clone this branch and verify both SHA manifests.
+1. Clone this branch and verify all three Qwen SHA manifests plus the KDA
+   manifest.
 2. Inspect the host device nodes, Docker daemon, groups, and existing container names.
 3. Clone SGLang/vLLM/AITER at the pinned commits.
 4. Pull the two image digests and create/reuse the two persistent containers with the bind mount.
@@ -337,6 +352,42 @@ third_party/vllm/vllm/models/kimi_k3/amd/ops/third_party/kda/fused_recurrent.py
 7. Run the existing smoke/correctness/benchmark scripts from kda_baseline as needed.
 8. Keep all generated outputs under the host project directory; do not add generated artifacts to the recovery branch.
 
-Codex conversation archives are intentionally not part of this code/environment
-branch yet. They should be restored separately after the repository and Docker
-environment are working.
+The current compiler worktree snapshot is also included as source only. It is a
+development snapshot, not a stable release; inspect the commit and build it only
+after the Qwen source/report checks pass.
+
+## 10. Codex 聊天记录归档
+
+本分支还包含一个脱敏的 Codex 本地会话快照：
+
+~~~text
+codex_archive/codex_chat_snapshot_20260912.tar.gz.part-00
+codex_archive/codex_chat_snapshot_20260912.tar.gz.part-01
+codex_archive/codex_chat_snapshot_20260912.tar.gz.part-02
+codex_archive/codex_chat_snapshot_20260912.tar.gz.part-03
+codex_archive/CODEX_CHAT_ARCHIVE_PARTS.sha256
+codex_archive/README.md
+~~~
+
+快照包含 128 个当前 session、7 个 archived session、108 个附件、36 个 shell
+snapshot，共 281 个源文件；gzip tar 大小为 175,284,077 bytes。分片 hash 必须
+先通过，才能拼接恢复。归档明确排除了 `auth.json`、SQLite/WAL、cache、socket、
+plugin state 和 model cache，并将 token/Bearer/private-key 等敏感内容替换为
+脱敏标记；新主机必须重新认证。
+
+新主机恢复步骤：
+
+~~~bash
+cd /home/jiandongliu/project/avelang/codex_archive
+sha256sum -c CODEX_CHAT_ARCHIVE_PARTS.sha256
+cat codex_chat_snapshot_20260912.tar.gz.part-* > /tmp/codex_chat_snapshot_20260912.tar.gz
+CODEX_HOME=${CODEX_HOME:-$HOME/.codex}
+mkdir -p "$CODEX_HOME"
+tar -xzf /tmp/codex_chat_snapshot_20260912.tar.gz -C "$CODEX_HOME" \
+  --strip-components=1 codex_home/sessions codex_home/archived_sessions \
+  codex_home/attachments codex_home/shell_snapshots codex_home/session_index.jsonl \
+  codex_home/config.toml
+~~~
+
+先备份新主机已有的 Codex 配置和会话，不要覆盖新主机的 `auth.json`。完整的
+归档说明和旧归档排除原因见 `codex_archive/README.md`。

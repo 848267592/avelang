@@ -67,6 +67,36 @@ class GpuOutliningPass
                     }
                 }
             });
+            // C14 creates the existing MFMA intrinsic call only after GPU
+            // outlining, when its typed physical operand has been consumed.
+            // Retain the already-declared implementation using an explicit
+            // symbol marker, rather than inventing a second MFMA backend or
+            // leaving an unresolved func.call in the GPU module.
+            funcOp.walk([&](mlir::Operation *operation) {
+                auto callee = operation->getAttrOfType<mlir::StringAttr>(
+                    "c14.mfma_callee");
+                if (!callee || !referencedNames.insert(callee.getValue()).second)
+                    return;
+                if (auto referencedFunc = module.lookupSymbol<mlir::func::FuncOp>(
+                        callee.getValue()))
+                    referencedFunctions.push_back(referencedFunc);
+            });
+            // C18's physical-region operand is intentionally still opaque at
+            // outlining time; its MFMA calls are emitted by the later
+            // operand materialization pass.  Carry the same intrinsic
+            // dependency across the boundary without adding a source-level
+            // dummy MFMA or a Qwen-specific kernel pattern.
+            funcOp.walk([&](mlir::Operation *operation) {
+                auto callee = operation->getAttrOfType<mlir::StringAttr>(
+                    operation->hasAttr("c19.mfma_callee")
+                        ? "c19.mfma_callee"
+                        : "c18.mfma_callee");
+                if (!callee || !referencedNames.insert(callee.getValue()).second)
+                    return;
+                if (auto referencedFunc = module.lookupSymbol<mlir::func::FuncOp>(
+                        callee.getValue()))
+                    referencedFunctions.push_back(referencedFunc);
+            });
         }
 
         // Copy referenced functions (like intrinsics) into the GPU module
