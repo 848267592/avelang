@@ -1,0 +1,26 @@
+{
+  "stage": "5B-S0-v1",
+  "status": "standalone_success",
+  "source_feature_gate": "passed",
+  "correctness": {
+    "v6_equivalent": true,
+    "w_u_consumer_equivalent": true,
+    "max_solve_abs_error": 3.725290298461914e-08,
+    "max_residual_inf": 3.725290298461914e-08
+  },
+  "t2048": {
+    "v1_ms": 0.030646000057458878,
+    "v18_ms": 0.12714900076389313,
+    "speedup_vs_v18": 4.148959098267265,
+    "rocprof_trace_us": 13.7,
+    "workgroup": 256,
+    "ctas": 256,
+    "lds_bytes": 8192,
+    "scratch_bytes": 0,
+    "vgpr": 44,
+    "accvgpr": 4
+  },
+  "ready_for_opt_in_full_pipeline_integration": true,
+  "production_dispatch_changed": false,
+  "next_action": "Wire the opt-in S0 solve into the experimental BT64 full pipeline and rerun that pipeline's frozen correctness matrix before making any production decision."
+}

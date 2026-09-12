@@ -1,0 +1,24 @@
+{
+  "symbol": "qwen_gdn_bt64_gfx942_asm_v0",
+  "kernarg_segment_size": 88,
+  "kernarg_segment_alignment": 8,
+  "arguments": [
+    {"offset": 0, "name": "k", "kind": "global_buffer", "bytes": 8},
+    {"offset": 8, "name": "v_or_u", "kind": "global_buffer", "bytes": 8},
+    {"offset": 16, "name": "w", "kind": "global_buffer", "bytes": 8},
+    {"offset": 24, "name": "v_new", "kind": "global_buffer", "bytes": 8},
+    {"offset": 32, "name": "g", "kind": "global_buffer", "bytes": 8},
+    {"offset": 40, "name": "h", "kind": "global_buffer", "bytes": 8},
+    {"offset": 48, "name": "h0", "kind": "global_buffer", "bytes": 8},
+    {"offset": 56, "name": "ht", "kind": "global_buffer", "bytes": 8},
+    {"offset": 64, "name": "T", "kind": "by_value_i32", "bytes": 4},
+    {"offset": 72, "name": "global_scratch", "kind": "global_buffer_null", "bytes": 8},
+    {"offset": 80, "name": "profile_scratch", "kind": "global_buffer_null", "bytes": 8}
+  ],
+  "launch": {
+    "grid": [4, 8, 1],
+    "workgroup": [256, 1, 1],
+    "dynamic_lds_bytes": 57344,
+    "stream": "torch.cuda.current_stream(device).cuda_stream"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "stage": "5B",
+  "experimental": true,
+  "input": {"dtype": "fp32", "shape": "[1,T,8,64]", "contiguous": true},
+  "output": {"dtype": "fp32", "shape": "[1,T,8,64]", "contiguous": true},
+  "math": "X = inverse(I + A), A strict lower triangular",
+  "block_size": 16,
+  "blocks_per_matrix": [4, 4],
+  "launch": {"cta_per_chunk_head": 1, "workgroup": 256, "waves": 4, "dispatches": 1},
+  "required_isa": "v_mfma_f32_16x16x4_f32",
+  "required_explicit_lds_max_bytes": 8192,
+  "required_scratch_bytes": 0,
+  "required_private_segment_bytes": 0,
+  "required_vgpr_spills": 0,
+  "required_sgpr_spills": 0,
+  "t2048_body_ms_max": 0.06,
+  "full_pipeline_requires_all_standalone_gates": true,
+  "v18_modified": false,
+  "compiler_modified": false,
+  "assembly_modified": false
+}

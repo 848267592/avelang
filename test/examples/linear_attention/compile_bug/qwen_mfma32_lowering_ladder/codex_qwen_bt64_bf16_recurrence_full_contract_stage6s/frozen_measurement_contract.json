@@ -1,0 +1,53 @@
+{
+  "graph_replay_only_timing": true,
+  "implementations": [
+    "graph_a_current_asm",
+    "graph_b_stage6s_bridge",
+    "graph_c_vllm"
+  ],
+  "orders": [
+    "ABBA",
+    "BCCB",
+    "ACCA"
+  ],
+  "repeat": 100,
+  "sessions": 5,
+  "stage6s_contract": {
+    "boundaries": [
+      "w:fp32->bf16",
+      "u:fp32->bf16",
+      "v_new:bf16->fp32"
+    ],
+    "bridge_inputs": {
+      "g": "fp32",
+      "initial_state": "fp32",
+      "k": "bf16",
+      "u": "bf16",
+      "w": "bf16"
+    },
+    "bridge_outputs": {
+      "final_state": "fp32",
+      "h": "bf16",
+      "v_new": "bf16"
+    },
+    "dynamic_lds": 40960,
+    "experimental_only": true,
+    "grid": [
+      4,
+      8,
+      1
+    ],
+    "hsaco": "/workspace/project/avelang/test/examples/linear_attention/compile_bug/qwen_mfma32_lowering_ladder/codex_qwen_bt64_recurrence_reconciliation_stage6r/current_kernels/vllm/kernel.hsaco",
+    "hsaco_sha256": "632026a536877921e7c057ecb1b1527983d947339608bbf71f3d1bd8c788077e",
+    "shape": "B=1,Hk=4,Hv=8,K=V=128,BT=64,T%64=0",
+    "solve_hsaco": "/workspace/project/avelang/test/examples/linear_attention/compile_bug/qwen_mfma32_lowering_ladder/codex_qwen_bt64_hierarchical_solve_stage5b/rocprof_s0_v1/isa/qwen_bt64_hierarchical_fp32_s0.hsaco",
+    "solve_hsaco_sha256": "b8c2dee0b1b94269170ff333da8fa912a38ae6198abd71de80d0898645091536",
+    "solve_symbol": "_qwen_gdn_solve_bt64_hierarchical_fp32_kernel_v1",
+    "solve_workgroup": 256,
+    "symbol": "chunk_gated_delta_rule_fwd_kernel_h_blockdim64",
+    "target": "gfx942",
+    "workgroup": 128
+  },
+  "stream": "current stream",
+  "warmup": 20
+}

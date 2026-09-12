@@ -1,0 +1,11 @@
+{
+  "authoritative_entry": "vllm.model_executor.layers.fla.ops.chunk.chunk_gated_delta_rule",
+  "candidate_entry": "qwen_gdn_full_bt64_gfx942_asm_v0",
+  "candidate_calls_vllm_full_wrapper": false,
+  "target": {"B": 1, "Hk": 4, "Hv": 8, "K": 128, "V": 128, "BT": 64, "layout": "[B,T,H,D]"},
+  "inputs": {"q": "bf16", "k": "bf16", "v": "bf16", "g": "fp32", "beta": "fp32", "initial_state": "fp32|null"},
+  "outputs": {"output": "bf16", "final_state": "fp32|null"},
+  "tail_policy": "reject T not divisible by 64",
+  "state_none_policy": "create zero FP32 state outside asm",
+  "recurrence_symbol": "qwen_gdn_bt64_gfx942_asm_v0"
+}

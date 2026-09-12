@@ -1,0 +1,38 @@
+{
+  "version": "stage2-experimental-v0",
+  "target": {
+    "architecture": "gfx942:sramecc+:xnack-",
+    "batch": 1,
+    "key_heads": 4,
+    "value_heads": 8,
+    "key_dim": 128,
+    "value_dim": 128,
+    "chunk_size": 64,
+    "layout": "[B,T,H,D]",
+    "tail_policy": "reject when T % 64 != 0"
+  },
+  "inputs": {
+    "q_k_v": "contiguous torch.bfloat16 CUDA/HIP tensors",
+    "g_beta": "contiguous torch.float32 CUDA/HIP tensors",
+    "initial_state": "null or contiguous torch.float32 [1,8,128,128]"
+  },
+  "stage_contract": {
+    "gate": "FP32 chunk-local cumsum",
+    "kkt": "FP32 [1,T,8,64] lower-triangular matrix",
+    "solve": "candidate FP32; vLLM capture BF16",
+    "w_u": "candidate FP32 for the asm ABI; vLLM capture BF16",
+    "recurrence": "frozen CASE C: FP32 W/U/G/H0, XF32 prediction, BF16 H/update operand, FP32 V_new/final_state",
+    "chunk_o": "BT64 generic experimental consumer of BF16 H converted to an FP32 view; it is not v24's BT16 chunk_o"
+  },
+  "public_outputs": {
+    "output": "torch.bfloat16 [1,T,8,128]",
+    "final_state": "torch.float32 [1,8,128,128] when output_final_state=true"
+  },
+  "acceptance": {
+    "public_output_atol": 0.0078125,
+    "final_state_atol": 0.02,
+    "reference": "vllm.model_executor.layers.fla.ops.chunk.chunk_gated_delta_rule"
+  },
+  "candidate_calls_vllm_full_wrapper": false,
+  "initial_state_none_policy": "allocate a mathematical all-zero FP32 state outside the immutable asm recurrence"
+}

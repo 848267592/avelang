@@ -1,0 +1,2810 @@
+{
+  "1024": {
+    "graph_a": {
+      "a": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          64
+        ],
+        "stride": [
+          524288,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          64
+        ],
+        "stride": [
+          524288,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0018000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 32768,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0008000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8
+        ],
+        "stride": [
+          8192,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3c00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          2097152,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0098000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4800000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "graph_b": {
+      "a": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          64
+        ],
+        "stride": [
+          524288,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4c00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          64
+        ],
+        "stride": [
+          524288,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0120000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 32768,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0118000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8
+        ],
+        "stride": [
+          8192,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5a00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          2097152,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0098000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6800000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u_bf16": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5800000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new_bf16": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5e00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w_bf16": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          1024,
+          8,
+          128
+        ],
+        "stride": [
+          1048576,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "u_fp32_to_bf16_widened": {
+      "max_abs": 0.007811546325683594,
+      "mean_abs": 0.0005627812352031469
+    },
+    "vnew_widened": {
+      "max_abs": 0.0,
+      "mean_abs": 0.0
+    },
+    "w_fp32_to_bf16_widened": {
+      "max_abs": 0.00048820674419403076,
+      "mean_abs": 1.3942920304543804e-05
+    }
+  },
+  "16384": {
+    "graph_a": {
+      "a": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecda8000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          64
+        ],
+        "stride": [
+          8388608,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdaa000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          64
+        ],
+        "stride": [
+          8388608,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ece06e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc80000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8
+        ],
+        "stride": [
+          131072,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecda3e00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          256,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          33554432,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd80000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd99800000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd9ba00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecdb0400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd9fc00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecdac200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "graph_b": {
+      "a": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd97600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          64
+        ],
+        "stride": [
+          8388608,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd95400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          64
+        ],
+        "stride": [
+          8388608,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ece06f00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ece06e80000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8
+        ],
+        "stride": [
+          131072,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd84a00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          256,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          33554432,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd80000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd78200000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd7a400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd8d000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u_bf16": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd88c00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd7e600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new_bf16": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd82800000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 67108864,
+        "contiguous": true,
+        "data_ptr": "0x7ecd91200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w_bf16": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecd8ae00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          16384,
+          8,
+          128
+        ],
+        "stride": [
+          16777216,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "u_fp32_to_bf16_widened": {
+      "max_abs": 0.015549182891845703,
+      "mean_abs": 0.0005668203812092543
+    },
+    "vnew_widened": {
+      "max_abs": 0.0,
+      "mean_abs": 0.0
+    },
+    "w_fp32_to_bf16_widened": {
+      "max_abs": 0.0009714663028717041,
+      "mean_abs": 1.4007681784278248e-05
+    }
+  },
+  "2048": {
+    "graph_a": {
+      "a": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          64
+        ],
+        "stride": [
+          1048576,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          64
+        ],
+        "stride": [
+          1048576,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc30000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 65536,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc10000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8
+        ],
+        "stride": [
+          16384,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4e00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          32,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          4194304,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefcb0000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "graph_b": {
+      "a": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          64
+        ],
+        "stride": [
+          1048576,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          64
+        ],
+        "stride": [
+          1048576,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd40000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 65536,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd30000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8
+        ],
+        "stride": [
+          16384,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf8a00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          32,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          4194304,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefcb0000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfa600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf9e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf7a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u_bf16": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf8600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf9600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new_bf16": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf9200000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf7200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w_bf16": {
+        "bytes": 4194304,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf8200000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2048,
+          8,
+          128
+        ],
+        "stride": [
+          2097152,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "u_fp32_to_bf16_widened": {
+      "max_abs": 0.007811069488525391,
+      "mean_abs": 0.0005672250408679247
+    },
+    "vnew_widened": {
+      "max_abs": 0.0,
+      "mean_abs": 0.0
+    },
+    "w_fp32_to_bf16_widened": {
+      "max_abs": 0.0006113648414611816,
+      "mean_abs": 1.3964399840915576e-05
+    }
+  },
+  "4096": {
+    "graph_a": {
+      "a": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          64
+        ],
+        "stride": [
+          2097152,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          64
+        ],
+        "stride": [
+          2097152,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc60000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 131072,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc20000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8
+        ],
+        "stride": [
+          32768,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf6e00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          64,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          8388608,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefce0000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf9e00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf8e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf5e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf7e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "graph_b": {
+      "a": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfa600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          64
+        ],
+        "stride": [
+          2097152,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfae00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          64
+        ],
+        "stride": [
+          2097152,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd80000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 131072,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd60000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8
+        ],
+        "stride": [
+          32768,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfe600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          64,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          8388608,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefce0000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ece01e00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ece00e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfc600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u_bf16": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfde00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdffe00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new_bf16": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdff600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfb600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w_bf16": {
+        "bytes": 8388608,
+        "contiguous": true,
+        "data_ptr": "0x7ecdfd600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          8,
+          128
+        ],
+        "stride": [
+          4194304,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "u_fp32_to_bf16_widened": {
+      "max_abs": 0.013699531555175781,
+      "mean_abs": 0.0005659866728819907
+    },
+    "vnew_widened": {
+      "max_abs": 0.0,
+      "mean_abs": 0.0
+    },
+    "w_fp32_to_bf16_widened": {
+      "max_abs": 0.0006651580333709717,
+      "mean_abs": 1.3898316865379456e-05
+    }
+  },
+  "512": {
+    "graph_a": {
+      "a": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7f0e34880000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          64
+        ],
+        "stride": [
+          262144,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7ece0500c000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          64
+        ],
+        "stride": [
+          262144,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7f0e34980000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 16384,
+        "contiguous": true,
+        "data_ptr": "0x7ece05004000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8
+        ],
+        "stride": [
+          4096,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3200000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          1048576,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7f0e34800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7f0e36400000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3600000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf2e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "graph_b": {
+      "a": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7f0e36500000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          64
+        ],
+        "stride": [
+          262144,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7f0e3c200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          64
+        ],
+        "stride": [
+          262144,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ece05110000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 16384,
+        "contiguous": true,
+        "data_ptr": "0x7ece0510c000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8
+        ],
+        "stride": [
+          4096,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3c00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          1048576,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7f0e34800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf4000000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u_bf16": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0000000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3e00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new_bf16": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf0100000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 2097152,
+        "contiguous": true,
+        "data_ptr": "0x7ecdf3800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w_bf16": {
+        "bytes": 1048576,
+        "contiguous": true,
+        "data_ptr": "0x7f0e3c300000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          512,
+          8,
+          128
+        ],
+        "stride": [
+          524288,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "u_fp32_to_bf16_widened": {
+      "max_abs": 0.007811784744262695,
+      "mean_abs": 0.0005650972598232329
+    },
+    "vnew_widened": {
+      "max_abs": 0.0,
+      "mean_abs": 0.0
+    },
+    "w_fp32_to_bf16_widened": {
+      "max_abs": 0.0007659196853637695,
+      "mean_abs": 1.4043722330825403e-05
+    }
+  },
+  "8192": {
+    "graph_a": {
+      "a": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdd3800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          64
+        ],
+        "stride": [
+          4194304,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdd4800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          64
+        ],
+        "stride": [
+          4194304,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefcc0000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 262144,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefc40000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8
+        ],
+        "stride": [
+          65536,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdd1600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          128,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          16777216,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd40000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdcc000000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdcd200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdd7c00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdcf400000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdd5a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "graph_b": {
+      "a": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdcae00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          64
+        ],
+        "stride": [
+          4194304,
+          512,
+          64,
+          1
+        ]
+      },
+      "a_solved": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc9c00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          64
+        ],
+        "stride": [
+          4194304,
+          512,
+          64,
+          1
+        ]
+      },
+      "final_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ece05200000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "g_cumsum": {
+        "bytes": 262144,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefdc0000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8
+        ],
+        "stride": [
+          65536,
+          8,
+          1
+        ]
+      },
+      "h_bf16": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc1200000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          128,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          16777216,
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "initial_state": {
+        "bytes": 524288,
+        "contiguous": true,
+        "data_ptr": "0x7ecdefd40000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8,
+          128,
+          128
+        ],
+        "stride": [
+          131072,
+          16384,
+          128,
+          1
+        ]
+      },
+      "output": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdbaa00000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "output_fp32": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdbbc00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc5800000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "u_bf16": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc3400000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdbde00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "v_new_bf16": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc0000000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w": {
+        "bytes": 33554432,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc7a00000",
+        "dtype": "torch.float32",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      },
+      "w_bf16": {
+        "bytes": 16777216,
+        "contiguous": true,
+        "data_ptr": "0x7ecdc4600000",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8192,
+          8,
+          128
+        ],
+        "stride": [
+          8388608,
+          1024,
+          128,
+          1
+        ]
+      }
+    },
+    "u_fp32_to_bf16_widened": {
+      "max_abs": 0.01459503173828125,
+      "mean_abs": 0.0005668667727150023
+    },
+    "vnew_widened": {
+      "max_abs": 0.0,
+      "mean_abs": 0.0
+    },
+    "w_fp32_to_bf16_widened": {
+      "max_abs": 0.0009517371654510498,
+      "mean_abs": 1.3956023394712247e-05
+    }
+  }
+}

@@ -1,0 +1,48 @@
+Displaying notes found in: .note
+  Owner                Data size 	Description
+  AMDGPU               0x000002f1	NT_AMDGPU_METADATA (AMDGPU Metadata)
+    AMDGPU Metadata:
+        ---
+amdhsa.kernels:
+  - .agpr_count:     32
+    .args:
+      - .address_space:  generic
+        .offset:         0
+        .size:           8
+        .value_kind:     global_buffer
+      - .address_space:  generic
+        .offset:         8
+        .size:           8
+        .value_kind:     global_buffer
+      - .address_space:  generic
+        .offset:         16
+        .size:           8
+        .value_kind:     global_buffer
+      - .address_space:  generic
+        .offset:         24
+        .size:           8
+        .value_kind:     global_buffer
+    .group_segment_fixed_size: 16384
+    .kernarg_segment_align: 8
+    .kernarg_segment_size: 32
+    .language:       OpenCL C
+    .language_version:
+      - 2
+      - 0
+    .max_flat_workgroup_size: 128
+    .name:           native_shaped_qh_t8192_wg128_kernel
+    .private_segment_fixed_size: 0
+    .sgpr_count:     20
+    .sgpr_spill_count: 0
+    .symbol:         native_shaped_qh_t8192_wg128_kernel.kd
+    .uniform_work_group_size: 1
+    .uses_dynamic_stack: false
+    .vgpr_count:     72
+    .vgpr_spill_count: 0
+    .wavefront_size: 64
+amdhsa.target:   amdgcn-amd-amdhsa--gfx942
+amdhsa.version:
+  - 1
+  - 2
+...
+

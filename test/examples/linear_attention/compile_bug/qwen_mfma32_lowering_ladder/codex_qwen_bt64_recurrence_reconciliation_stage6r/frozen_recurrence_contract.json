@@ -1,0 +1,19 @@
+{
+  "stage": "6R",
+  "audit_only": true,
+  "target": "gfx942",
+  "shape": {"B": 1, "Hk": 4, "Hv": 8, "K": 128, "V": 128, "BT": 64},
+  "T": [512, 2048, 8192, 16384],
+  "input_seed_policy": "Stage 6A fixed_inputs(T)",
+  "initial_state": "nonzero contiguous fp32",
+  "stream": "current PyTorch HIP stream",
+  "timing": {
+    "method": "HIP event around one captured recurrence graph replay",
+    "warmup": 20,
+    "repeat": 100,
+    "sessions": 5,
+    "order": "ABBA",
+    "compile_module_load_allocation_in_timing": false,
+    "profiler_is_latency_authority": false
+  }
+}

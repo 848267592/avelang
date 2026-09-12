@@ -1,0 +1,127 @@
+# KDA baseline Stage 0 host inspection
+# Timestamp: 2026-09-10T12:42:00+00:00
+# Hostname: nimrodmi300
+# Note: the first probe below was run inside the Codex restricted sandbox.
+# The real-host verification is recorded in the final section below.
+
+## rocminfo
+
+Exit code: 1
+
+ROCk module version 6.16.13 is loaded
+Unable to open /dev/kfd read-write: No such file or directory
+jiandongliu is not member of "video" group, the default DRM access group. Users must be a member of the "video" group or another DRM access group in order for ROCm applications to run successfully
+
+## rocm-smi
+
+Driver version: 6.16.13
+Visible GPU count: 8
+
+All eight devices report:
+
+- Card Model: 0x74a1
+- Card Vendor: Advanced Micro Devices, Inc. [AMD/ATI]
+- Card SKU: M3000100
+- GFX Version: gfx942
+
+The concise table reported nodes 2 through 9. Product-name/libdrm queries emitted
+`amdgpu_get_auth (1) failed (-1)` and `get_name, Error when calling libdrm`,
+but the device SKU and gfx942 identify the expected MI300X-class hardware.
+
+## docker version
+
+Client: Docker Engine - Community
+Version: 29.5.1
+API version: 1.54
+Go version: go1.26.3
+Git commit: 2518b52
+OS/Arch: linux/amd64
+Context: default
+
+Server access failed:
+
+permission denied while trying to connect to the Docker API at
+unix:///var/run/docker.sock
+
+## docker info
+
+Docker client/plugins are present, but the Server section could not be read:
+
+permission denied while trying to connect to the Docker API at
+unix:///var/run/docker.sock
+
+## /dev/kfd
+
+ls: cannot access '/dev/kfd': No such file or directory
+
+## /dev/dri
+
+ls: cannot access '/dev/dri': No such file or directory
+
+## groups
+
+uid=1028(jiandongliu) gid=1028(jiandongliu) groups=1028(jiandongliu),65534(nogroup)
+jiandongliu
+
+## uname
+
+Linux nimrodmi300 5.15.0-190-generic #200-Ubuntu SMP Fri Aug 7 15:06:04 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+## amdgpu module
+
+amdgpu 17870848 10
+
+## Initial sandbox decision
+
+This initial probe was not a valid host result: the Codex sandbox hid
+/dev/kfd and /dev/dri and denied access to the Docker API. It was retained here
+as evidence for diagnosing the execution-environment mismatch.
+
+## Real-host verification (read-only escalated check)
+
+Timestamp: 2026-09-10T12:46:08Z
+
+Identity and location:
+
+- user: `jiandongliu`
+- hostname: `nimrodmi300`
+- project path: `/home/jiandongliu/project`
+
+GPU and ROCm:
+
+- `/dev/kfd`: present, `root:render`, mode `crw-rw----`
+- `/dev/dri`: present, with 63 `renderD*` nodes
+- `rocm-smi` driver: `6.16.13`
+- eight GPUs report Card SKU `M3000100` and GFX Version `gfx942`
+- `rocminfo` reaches the real device but the unprivileged account lacks the
+  `render` group, so it reports `Unable to open /dev/kfd read-write:
+  Permission denied`; this is a user-group limitation, not a missing device
+
+Docker:
+
+- user is in the `docker` group
+- Docker client/server: `29.5.1`, API `1.54`
+- containerd: `v2.2.3`
+- runc: `1.3.5`
+- Docker root: `/data01/docker`
+- server reports 7 containers, 6 running, 33 images
+- Docker socket: `root:docker`, mode `srw-rw----`
+
+Existing containers observed (read-only; none were stopped or modified):
+
+- `flashvsr-api` — `flashvsr-api:rocm`
+- `ljd_qwen_vllm_avelang_rocm722` — `qwen_vllm_avelang_rocm722_backup:latest`
+- `quirky_cannon` — `rocm/pytorch:rocm7.2.2_ubuntu24.04_py3.12_pytorch_release_2.10.0`
+- `avelang_gcz` — `rocm/pytorch:rocm7.2.2_ubuntu24.04_py3.12_pytorch_release_2.10.0`
+- `substrate_gcz` — `rocm/pytorch:rocm7.1.1_ubuntu24.04_py3.12_pytorch_release_2.9.1`
+- `avelang-mi300-runner-dind-1` — `docker:29.4.0-dind`
+
+## Stage 0 decision
+
+Stage 0 passes on the real host: the machine is MI300X-class/gfx942 with eight
+GPUs, the GPU device nodes exist, and the Docker daemon is accessible. The
+initial failure was caused by the Codex sandbox. No source was downloaded and
+no Docker container was created or changed during these checks. The host user
+still lacks the `render` group, so GPU access from a host-process `rocminfo`
+is restricted; container tests must explicitly pass the device nodes and
+appropriate groups, and this runbook does not modify the host groups.

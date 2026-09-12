@@ -1,0 +1,36 @@
+{
+  "contract": {
+    "target": "gfx942",
+    "T": 8192,
+    "logical_operation": "Q[64,32] @ H[32,64] -> f32[64,64]",
+    "workgroup": 128,
+    "waves": 2,
+    "num_warps": 2,
+    "mfma": "v_mfma_f32_32x32x8_bf16",
+    "z5b_modified": false,
+    "qk_scorev_touched": false
+  },
+  "observations": [
+    {
+      "source_pattern": "row_code",
+      "b_high": 1.0,
+      "max_abs": 0.0
+    },
+    {
+      "source_pattern": "row_code",
+      "b_high": 2.0,
+      "max_abs": 0.0
+    },
+    {
+      "source_pattern": "row_half",
+      "b_high": 1.0,
+      "max_abs": 0.0
+    },
+    {
+      "source_pattern": "row_half",
+      "b_high": 2.0,
+      "max_abs": 0.0
+    }
+  ],
+  "all_max_abs_zero": true
+}

@@ -1,0 +1,9 @@
+{
+  "mfma32": 8,
+  "global_or_buffer_load": 4,
+  "ds_read": 45,
+  "ds_write": 68,
+  "v_perm_b32": 20,
+  "s_barrier": 2,
+  "s_waitcnt": 23
+}
