@@ -264,5 +264,5 @@ test/examples/linear_attention/compile_bug/qwen_mfma32_lowering_ladder/
 - 暂存状态：64 个 allowlist 新增文件，加上 4 个迁移元数据文件；allowlist 中另外
   23 个文件原本已存在于当前 HEAD，因此不产生新的 staged diff。
 - 旧分支是否已有这些文件：不影响本分支计划。
-- 本轮：Qwen 实现未修改；迁移主 commit 已创建为 `3fde826`，尚未 push，未删除或
-  移动任何文件。
+- 本轮：Qwen 实现未修改；迁移主 commit 为 `3fde826`，已推送并完成远端恢复验证，
+  未删除或移动任何文件。

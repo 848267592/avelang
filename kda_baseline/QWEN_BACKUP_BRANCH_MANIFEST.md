@@ -178,7 +178,8 @@ origin  https://github.com/causalflow-ai/avelang.git
 4. **本地审查并提交**：检查 staged stat、路径、敏感信息、大文件和 hash，然后
    创建本地迁移 commit；已完成，主 commit 为 `3fde826`。
 5. **推送并验证恢复**：push 新分支到 `myfork`，再用临时目录做一次 clone/文件/hash
-   验证，最后再处理 Codex 聊天记录归档；尚未执行。
+   验证，最后再处理 Codex 聊天记录归档；代码/环境迁移已完成，Codex 聊天记录仍
+   单独保留为后续归档项。
 
 第 2 步已生成：
 
@@ -200,5 +201,7 @@ origin  https://github.com/causalflow-ai/avelang.git
 allowlist 新增文件、4 个迁移元数据文件，以及上面列出的 KDA/容器文件和 hash
 已暂存。allowlist 中另外 23 个文件原本已在当前 HEAD，因此在分支工作树中已经
 存在，不产生新的 staged diff。现有 19 个 modified tracked 文件仍未暂存；
-`QWEN_UPLOAD_INVENTORY.md` 仍保持未跟踪且未纳入。主迁移 commit 已创建为
-`3fde826`；当前仍**未 push、未删除或移动任何文件**。
+`QWEN_UPLOAD_INVENTORY.md` 仍保持未跟踪且未纳入，这是有意排除的旧规划文档，不是
+迁移遗漏。主迁移 commit 为 `3fde826`，状态 commit 为 `c6e3172`；远端最终 HEAD
+为 `c6e31721535bca08d47f159b9633cb54d1592047`。临时 clone 已完成 hash、语法、
+关键入口和容器 metadata 验证并删除；当前**未删除或移动项目文件，也未修改 Docker**。
