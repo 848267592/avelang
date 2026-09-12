@@ -17,3 +17,9 @@ Ave is alpha-stage software. APIs, generated code, and backend coverage may chan
 This fork contains an experimental AMD MI300X Qwen GDN X2+Z5B integration. See
 the [X2+Z5B entry README](QWEN_GDN_X2_Z5B.md) for the code path, compiler intrinsic
 change, validation commands, and measured results.
+
+## Qwen / KDA recovery
+
+For a fresh host, use the self-contained [Qwen/KDA recovery runbook](QWEN_KDA_RECOVERY_README.md).
+It pins the backup branch, official SGLang/vLLM/AITER commits, Docker image digests,
+host-to-container mount paths, persistent container commands, and verification steps.
