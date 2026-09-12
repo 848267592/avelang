@@ -162,8 +162,8 @@ myfork  git@github.com:848267592/avelang.git
 origin  https://github.com/causalflow-ai/avelang.git
 ```
 
-本次目标是在 `myfork` 上创建新的独立备份分支；当前分支已创建但尚未推送。不假定
-旧的 GitHub 分支或旧上传内容存在，也不覆盖旧分支。
+本次目标是在 `myfork` 上创建新的独立备份分支；当前分支已创建并完成本地 commit，
+尚未推送。不假定旧的 GitHub 分支或旧上传内容存在，也不覆盖旧分支。
 
 ## 7. 后续步骤（尚未执行）
 
@@ -176,7 +176,7 @@ origin  https://github.com/causalflow-ai/avelang.git
 3. **创建独立分支并暂存**：创建 `backup/qwen-kda-repro-2026-09`，只按 allowlist
    加入 Qwen 文件、KDA/容器元数据和迁移文档；已完成。
 4. **本地审查并提交**：检查 staged stat、路径、敏感信息、大文件和 hash，然后
-   创建本地迁移 commit；尚未执行。
+   创建本地迁移 commit；已完成，主 commit 为 `3fde826`。
 5. **推送并验证恢复**：push 新分支到 `myfork`，再用临时目录做一次 clone/文件/hash
    验证，最后再处理 Codex 聊天记录归档；尚未执行。
 
@@ -196,9 +196,9 @@ origin  https://github.com/causalflow-ai/avelang.git
 3. 检查 `git diff --cached --stat`、文件路径、敏感信息和大文件；
 4. 由你确认后再 commit/push 到新的 GitHub 分支。
 
-截至 Step 4 审查前：备份分支已创建为 `backup/qwen-kda-repro-2026-09`；原 64 个
+截至 Step 4：备份分支已创建为 `backup/qwen-kda-repro-2026-09`；原 64 个
 allowlist 新增文件、4 个迁移元数据文件，以及上面列出的 KDA/容器文件和 hash
 已暂存。allowlist 中另外 23 个文件原本已在当前 HEAD，因此在分支工作树中已经
 存在，不产生新的 staged diff。现有 19 个 modified tracked 文件仍未暂存；
-`QWEN_UPLOAD_INVENTORY.md` 仍保持未跟踪且未纳入。当前仍**未 commit、未 push、未
-删除或移动任何文件**。
+`QWEN_UPLOAD_INVENTORY.md` 仍保持未跟踪且未纳入。主迁移 commit 已创建为
+`3fde826`；当前仍**未 push、未删除或移动任何文件**。
