@@ -1,0 +1,20 @@
+@@ -76,2 +76,19 @@
+ 
++The B70 LLIR makes the operand carrier address formulas explicit. For Kd/Qd,
++with `t=64*w+l` and `wavebase=64*w`, the logical-A shared read base is
++`((wavebase&128)<<4) | ((l&15)<<7) | ((l&48)>>1)` and its four MFMA-step
++vectors read halfwords at `base + 32*k + 2*f`. The logical-B shared read base
++is `((l&48)<<3) + ((l&15)<<1)` and its four-step vectors read at
++`base + 512*k + {0,32,64,96}`, followed by the LLIR shufflevectors. In the
++transposed MFMA instruction, the B-derived vector is physical source 0 and
++the A-derived vector is physical source 1. Evidence: B70 Kd LLIR lines
++46-63,83-124 and MFMA lines 125-128.
++
++For INV/Mqk, the blocked4 A packet is `row=8*w+l//8`,
++`col=4*(l%8)+q`; the B70 shared stores/readers are visible in INV LLIR lines
++20-31,40-52 and 55-88, with the two K-step vectors assembled at lines 83-90.
++The same paired-wave result carrier is used for U/Mqk, but pinned U enters
++through `#mma1 -> #shared4 -> dot_op(opIdx=1)` rather than a row-major scalar
++store.
++
+ ## LDS_WAVE_MAP

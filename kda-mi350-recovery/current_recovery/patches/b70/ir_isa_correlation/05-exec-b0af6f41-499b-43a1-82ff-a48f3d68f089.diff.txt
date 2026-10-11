@@ -1,0 +1,10 @@
+@@ -118,2 +118,3 @@
+             "direct_store_probe": "active when (w&1)==0; odd-wave fragments remain computed",
++            "kr_mma_carrier": "#mma warpsPerCTA=[4,1]: row=16*w+(l&15), col=4*(l>>4)+f",
+             "evidence": [
+@@ -300,2 +301,5 @@
+ 
++The separate Kr/H `#mma` carrier is `row=16*w+(l&15), col=4*(l>>4)+f`
++(`warpsPerCTA=[4,1]`).
++
+ ## ORDINARY_V_CARRIER_MAP

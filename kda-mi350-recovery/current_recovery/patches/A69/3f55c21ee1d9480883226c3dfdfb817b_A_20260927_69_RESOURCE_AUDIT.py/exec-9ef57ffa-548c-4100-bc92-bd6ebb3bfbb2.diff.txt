@@ -1,0 +1,10 @@
+@@ -177,3 +177,3 @@
+         "vmem_store": _count(loop, r"(?:global|flat|buffer)_store(?:_|\b)"),
+-        "lds_read": _count(loop, r"ds_read(?:_|\b)"),
++        "lds_read": _count(loop, r"ds_read(?:_|\d|\b)"),
+         "lds_write": _count(loop, r"ds_write(?:_|\b)"),
+@@ -182,3 +182,3 @@
+         "v_perm": _count(loop, r"v_perm(?:_|\b)"),
+-        "ds_bpermute": _count(loop, r"ds_bpermute\b"),
++        "ds_bpermute": _count(loop, r"ds_bpermute(?:_|\b)"),
+         "loop_instruction_lines": len(loop),

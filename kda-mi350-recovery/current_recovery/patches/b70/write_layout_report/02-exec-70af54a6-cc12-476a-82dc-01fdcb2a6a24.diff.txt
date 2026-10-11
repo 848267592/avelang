@@ -1,0 +1,9 @@
+@@ -153,2 +153,8 @@
+         "read_only": True,
++        "permission_check": {
++            "target": "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY",
++            "observed_mode": "0755",
++            "permission_change": "none",
++            "A69_directory_touched": False,
++        },
+         "MMA1_LOGICAL_MAP": {

@@ -1,0 +1,291 @@
+{
+  "schema": "kda-mi350-b70-recovery/v1",
+  "artifact": "B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY",
+  "scope": "Isolated MI300X four-wave MFMA ownership/LDS/Kr permutation forensic probes; not a complete K2 kernel and no A69 production edits.",
+  "generated_local": "2026-10-10 20:30:21 +08:00",
+  "classification_guide": "RECONSTRUCTED means complete recovered bytes with original machine-side SHA unavailable; PARTIAL means truncated source; METADATA_ONLY means only filename/path or output expectation survives.",
+  "files": [
+    {
+      "package_path": "reports/B_20260927_70_LAYOUT_RECOVERY.md",
+      "original_path": "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY/B_20260927_70_LAYOUT_RECOVERY.md",
+      "status": "RECONSTRUCTED",
+      "bytes": 6758,
+      "sha256": "57b715bb3cb6b5bbf27ecf3a21158fae32c0d6a61d8ccda1c384ebbe55973bd8",
+      "original_sha256": null,
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/921cc2f9947b4e04b93d6e2138f594e9_B_20260927_70_LAYOUT_RECOVERY.md/exec-bc83d6bd-e5e8-444c-afe0-f68a7dfe8d7b.source.txt",
+      "source_event_ids": [
+        "exec-bc83d6bd-e5e8-444c-afe0-f68a7dfe8d7b"
+      ],
+      "evidence_complete": true,
+      "notes": "Complete direct add body, no recorded update; original machine-side SHA unavailable."
+    },
+    {
+      "package_path": "analysis/k2/B_20260927_70_LAYOUT_PROBES.py",
+      "original_path": "test/examples/kda/tools/B_20260927_70_LAYOUT_PROBES.py",
+      "status": "RECONSTRUCTED",
+      "bytes": 3706,
+      "sha256": "cae3ea07cf76c98e04279b5a6ce6d83265bd87e1675a8c4d4972139967da2a4f",
+      "original_sha256": null,
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c694b5cc01bc4083a2d35f4adcb8157e_B_20260927_70_LAYOUT_PROBES.py/exec-e7ba4ec0-d8bf-4b75-b8ef-749a9d4ebac6.source.txt",
+      "source_event_ids": [
+        "exec-e7ba4ec0-d8bf-4b75-b8ef-749a9d4ebac6"
+      ],
+      "evidence_complete": true,
+      "notes": "Complete direct add body, no recorded update; original machine-side SHA unavailable."
+    },
+    {
+      "package_path": "analysis/k2/B_20260927_70_PROBE_CORRECTNESS.py",
+      "original_path": "test/examples/kda/tools/B_20260927_70_PROBE_CORRECTNESS.py",
+      "status": "RECONSTRUCTED",
+      "bytes": 4312,
+      "sha256": "8fb6ee8d0307a20c19cdcb699fcffe997ca9c4dba57857c460c2849800298c3c",
+      "original_sha256": null,
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/dde4d1e39b76446482ab437c1afde7b9_B_20260927_70_PROBE_CORRECTNESS.py/exec-aa7a496a-fb00-4cfa-af0f-11ac0e842050.source.txt",
+      "source_event_ids": [
+        "exec-aa7a496a-fb00-4cfa-af0f-11ac0e842050"
+      ],
+      "evidence_complete": true,
+      "notes": "Complete direct add body; no correctness run was performed during this recovery."
+    },
+    {
+      "package_path": "analysis/k2/B_20260927_70_WRITE_LAYOUT_REPORT.py",
+      "original_path": "test/examples/kda/tools/B_20260927_70_WRITE_LAYOUT_REPORT.py",
+      "status": "RECONSTRUCTED",
+      "bytes": 188,
+      "sha256": "3232d49c16735bbc2d815b4d2d6f8f64924bd61f6eba976cef9767beedff2037",
+      "original_sha256": null,
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-c59c6e97-5d27-41a8-b4bb-7e39712cb751.source.txt",
+      "source_event_ids": [
+        "exec-c59c6e97-5d27-41a8-b4bb-7e39712cb751"
+      ],
+      "evidence_complete": true,
+      "notes": "Final 188-byte compatibility shim; depends on the missing correlation module."
+    },
+    {
+      "package_path": "analysis/k2/history/B_20260927_70_WRITE_LAYOUT_REPORT.initial.py",
+      "original_path": "test/examples/kda/tools/B_20260927_70_WRITE_LAYOUT_REPORT.py",
+      "status": "RECONSTRUCTED",
+      "bytes": 6410,
+      "sha256": "9a7244ed1789627d0ec7820743bd625a5a5636bb0c363d363ff632b5b2ae0eff",
+      "original_sha256": null,
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-0d39ae1f-1e45-41b2-a552-f043178b9f70.source.txt",
+      "source_event_ids": [
+        "exec-0d39ae1f-1e45-41b2-a552-f043178b9f70"
+      ],
+      "evidence_complete": true,
+      "notes": "Earlier complete 6410-byte writer version; later replaced by compatibility shim."
+    },
+    {
+      "package_path": "analysis/k2/partials/B_20260927_70_IR_ISA_CORRELATION.py.partial.txt",
+      "original_path": "test/examples/kda/tools/B_20260927_70_IR_ISA_CORRELATION.py",
+      "status": "PARTIAL",
+      "bytes": 12000,
+      "sha256": "72ff032e5bad3383f9b87219f621dbdd5507958a9b67bfd7d8a99efe0b8fe6fb",
+      "original_sha256": null,
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/B_20260927_70_IR_ISA_CORRELATION.py.partial.txt",
+      "source_event_ids": [
+        "exec-2a9ad00d-8d5b-4e6d-9bb0-99749d3fc693"
+      ],
+      "evidence_complete": false,
+      "notes": "12000-byte source fragment ends mid-dictionary; base source was truncated."
+    },
+    {
+      "package_path": "patches/b70/ir_isa_correlation/01-exec-1ef58e12-bede-4243-a54c-feed3fae302a.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-1ef58e12-bede-4243-a54c-feed3fae302a.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 212,
+      "sha256": "5efc8bb416f5e8ee9a820be0b43b71f57870cafd711e3bca056db3d01799f1b0",
+      "original_sha256": "5efc8bb416f5e8ee9a820be0b43b71f57870cafd711e3bca056db3d01799f1b0",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-1ef58e12-bede-4243-a54c-feed3fae302a.diff.diff.txt",
+      "source_event_ids": [
+        "exec-1ef58e12-bede-4243-a54c-feed3fae302a.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/ir_isa_correlation/02-exec-aba5e85b-13a0-43fc-bede-0e81ed3b5d14.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-aba5e85b-13a0-43fc-bede-0e81ed3b5d14.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 489,
+      "sha256": "1a4e05d6071e4970d6f7e073cea88bb074de2f98467496404e70d4b2fe6b8c29",
+      "original_sha256": "1a4e05d6071e4970d6f7e073cea88bb074de2f98467496404e70d4b2fe6b8c29",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-aba5e85b-13a0-43fc-bede-0e81ed3b5d14.diff.diff.txt",
+      "source_event_ids": [
+        "exec-aba5e85b-13a0-43fc-bede-0e81ed3b5d14.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/ir_isa_correlation/03-exec-b2673ebf-6e01-4f76-924c-70bd46ae9499.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-b2673ebf-6e01-4f76-924c-70bd46ae9499.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 1442,
+      "sha256": "849ffa9fd6755585565a582e8c069ee4fc14293c8e41a856bc8425fbcea46da1",
+      "original_sha256": "849ffa9fd6755585565a582e8c069ee4fc14293c8e41a856bc8425fbcea46da1",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-b2673ebf-6e01-4f76-924c-70bd46ae9499.diff.diff.txt",
+      "source_event_ids": [
+        "exec-b2673ebf-6e01-4f76-924c-70bd46ae9499.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/ir_isa_correlation/04-exec-a714f324-4358-4978-bfa2-3a189aff21a6.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-a714f324-4358-4978-bfa2-3a189aff21a6.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 847,
+      "sha256": "50eb8e28b16b1e52f7ce08719ba4124198abc70b9ca4896fcdaafc5806017710",
+      "original_sha256": "50eb8e28b16b1e52f7ce08719ba4124198abc70b9ca4896fcdaafc5806017710",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-a714f324-4358-4978-bfa2-3a189aff21a6.diff.diff.txt",
+      "source_event_ids": [
+        "exec-a714f324-4358-4978-bfa2-3a189aff21a6.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/ir_isa_correlation/05-exec-b0af6f41-499b-43a1-82ff-a48f3d68f089.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-b0af6f41-499b-43a1-82ff-a48f3d68f089.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 378,
+      "sha256": "4bb0367cbabfb5a6648af34f0a213217108fa86bce2fe350112305f78da08826",
+      "original_sha256": "4bb0367cbabfb5a6648af34f0a213217108fa86bce2fe350112305f78da08826",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/70cfc35a069440c181ecaf7f7a22b212_B_20260927_70_IR_ISA_CORRELATION.py/exec-b0af6f41-499b-43a1-82ff-a48f3d68f089.diff.diff.txt",
+      "source_event_ids": [
+        "exec-b0af6f41-499b-43a1-82ff-a48f3d68f089.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/write_layout_report/01-exec-2314e732-eb32-4b58-ab3b-a47c6fcfdbce.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-2314e732-eb32-4b58-ab3b-a47c6fcfdbce.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 1047,
+      "sha256": "85bd6fc01596bc37271ae8e109e6fe9550136da92c849bef8f049b361146b1a1",
+      "original_sha256": "85bd6fc01596bc37271ae8e109e6fe9550136da92c849bef8f049b361146b1a1",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-2314e732-eb32-4b58-ab3b-a47c6fcfdbce.diff.diff.txt",
+      "source_event_ids": [
+        "exec-2314e732-eb32-4b58-ab3b-a47c6fcfdbce.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/write_layout_report/02-exec-70af54a6-cc12-476a-82dc-01fdcb2a6a24.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-70af54a6-cc12-476a-82dc-01fdcb2a6a24.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 342,
+      "sha256": "7fae7112a46033c34ab8bba253c5ac01e90fb676b9cb0eb136a7c59b521faba2",
+      "original_sha256": "7fae7112a46033c34ab8bba253c5ac01e90fb676b9cb0eb136a7c59b521faba2",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-70af54a6-cc12-476a-82dc-01fdcb2a6a24.diff.diff.txt",
+      "source_event_ids": [
+        "exec-70af54a6-cc12-476a-82dc-01fdcb2a6a24.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/write_layout_report/03-exec-bdd45365-fe16-4597-9404-121a2d073c3a.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-bdd45365-fe16-4597-9404-121a2d073c3a.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 1103,
+      "sha256": "243feb23d2af995355806402b3c9a8ebf3bdec9f4db802fa719539fb94654dc8",
+      "original_sha256": "243feb23d2af995355806402b3c9a8ebf3bdec9f4db802fa719539fb94654dc8",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-bdd45365-fe16-4597-9404-121a2d073c3a.diff.diff.txt",
+      "source_event_ids": [
+        "exec-bdd45365-fe16-4597-9404-121a2d073c3a.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/write_layout_report/04-exec-53ce27a6-0529-42f5-99a7-9598e7b7ae07.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-53ce27a6-0529-42f5-99a7-9598e7b7ae07.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 1381,
+      "sha256": "037c1759bc2c1374f3f564d5f833c33f44a7bb4de6c8ea157a7375bb2134a1ee",
+      "original_sha256": "037c1759bc2c1374f3f564d5f833c33f44a7bb4de6c8ea157a7375bb2134a1ee",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-53ce27a6-0529-42f5-99a7-9598e7b7ae07.diff.diff.txt",
+      "source_event_ids": [
+        "exec-53ce27a6-0529-42f5-99a7-9598e7b7ae07.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/write_layout_report/05-exec-d60dd87a-c7d7-43f3-b65d-4f86b10bdf46.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-d60dd87a-c7d7-43f3-b65d-4f86b10bdf46.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 2584,
+      "sha256": "60d8b5a09261155772f447edd99f0607bacf96ade17609f04b406c3f41457acf",
+      "original_sha256": "60d8b5a09261155772f447edd99f0607bacf96ade17609f04b406c3f41457acf",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-d60dd87a-c7d7-43f3-b65d-4f86b10bdf46.diff.diff.txt",
+      "source_event_ids": [
+        "exec-d60dd87a-c7d7-43f3-b65d-4f86b10bdf46.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    },
+    {
+      "package_path": "patches/b70/write_layout_report/06-exec-d0bbe876-3b80-4f48-b183-8e762a2db6cc.diff.txt",
+      "original_path": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-d0bbe876-3b80-4f48-b183-8e762a2db6cc.diff.diff.txt",
+      "status": "EXACT_RECOVERED",
+      "bytes": 10344,
+      "sha256": "57f31c5fadf99baf7766b47a96053da407d0025dc96f3cfe5a6ffba2e383984b",
+      "original_sha256": "57f31c5fadf99baf7766b47a96053da407d0025dc96f3cfe5a6ffba2e383984b",
+      "evidence_file": "patches/replay_20261010/K2_AB_thread_final/c69edc38047046bd90acd799e0cb80c0_B_20260927_70_WRITE_LAYOUT_REPORT.py/exec-d0bbe876-3b80-4f48-b183-8e762a2db6cc.diff.diff.txt",
+      "source_event_ids": [
+        "exec-d0bbe876-3b80-4f48-b183-8e762a2db6cc.diff"
+      ],
+      "evidence_complete": true,
+      "notes": "Exact patch artifact bytes preserved; not replayed during this recovery."
+    }
+  ],
+  "missing_artifacts": [
+    {
+      "original_path": "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY/B_20260927_70_IR_ISA_CORRELATION.json",
+      "status": "METADATA_ONLY",
+      "sha256": null,
+      "note": "No full JSON body or matching file was found in the collected B70 artifacts/inventories."
+    },
+    {
+      "original_path": "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY/B_20260927_70_PROBE_CORRECTNESS.json",
+      "status": "METADATA_ONLY",
+      "sha256": null,
+      "note": "Expected output path appears in the recovered correctness source; output JSON bytes are absent."
+    },
+    {
+      "original_path": "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY/B_20260927_70_LAYOUT_PROBES.json",
+      "status": "METADATA_ONLY",
+      "sha256": null,
+      "note": "Expected output path appears in the recovered probe source; output JSON bytes are absent."
+    },
+    {
+      "original_path": "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY/B_20260927_70_LAYOUT_RECOVERY.json",
+      "status": "METADATA_ONLY",
+      "sha256": null,
+      "note": "Expected output path appears in the historical report writer; output JSON bytes are absent."
+    }
+  ],
+  "unresolved_topics": [
+    {
+      "artifact": "Standalone A69_REQUIRED_CHANGES audit",
+      "status": "NOT_FOUND",
+      "note": "No separate original audit file found in targeted B70 assets; the B70 report says it did not modify A69."
+    },
+    {
+      "artifact": "Custom Avelang intrinsic implementation",
+      "status": "NOT_FOUND",
+      "note": "No standalone intrinsic source recovered; available isolated probes import PyTorch/Triton."
+    },
+    {
+      "artifact": "B70 generated IR/ISA/HSACO payloads",
+      "status": "NOT_FOUND",
+      "note": "The report cites machine outputs, but no matching B70 compiler payload files were collected."
+    }
+  ],
+  "source_session": "K2_AB_thread_final; selected source bodies and patch evidence only, never original JSONL."
+}

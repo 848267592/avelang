@@ -1,0 +1,17 @@
+{
+  "phase": "A67_T32_NT1_MQK_PREFIX_AUDIT",
+  "case": {"T": 32, "NT": 1, "seed": 74},
+  "reference": {
+    "math": "A56 BW64 K2 semantics",
+    "machine": "AITER BW16/W4/S2 commit 7bb44998274fa679ece0a37bf8426ab780b1837",
+    "hsaco": "85470da1877fcd49db1b9adee0129fff9787e7953d221817198ce2434cd0ac16"
+  },
+  "gates": {
+    "1_post_inv_u_fp32": {"max_abs": 2.384185791015625e-07},
+    "2_u_fp32_to_fp16": {"bit_exact": true, "elements": 6144},
+    "3_u_fp16_lds_overlay": {"bit_mismatches": 5609, "first_index": [16]}
+  },
+  "passed": false,
+  "stopped_at": "3_u_fp16_lds_overlay",
+  "fix": "publish post-INV acc_u converted to FP16 into the overlay before Mqk"
+}

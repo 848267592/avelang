@@ -1,0 +1,19 @@
+@@ -153,6 +153,9 @@
+ 
+-All three B70 probes compiled and executed with finite output. Their TTGIR,
+-LLIR, AMDGCN, HSACO, and metadata are copied into this directory. The logical
+-`#mma1`/`#mma` output carriers are machine-derived. The report is a frozen
+-forensic map and required-change ledger, not a production promotion.
++All three B70 probes compiled and executed with finite output. An independent
++`torch.float32 @` reconstruction matched every logical output element with
++`max_abs=0.0` for Kd/Qd-shaped, INV/Mqk-shaped, and Kr-shaped cases. The
++blocked1/blocked4/blocked3/blocked packet enumerations and the `#mma1/#mma`
++result carrier enumerations were exact across all four waves. Their TTGIR,
++LLIR, AMDGCN, HSACO, and metadata are copied into this directory. This is an
++accepted read-only machine map, not a production promotion.
+ '''
+@@ -195,3 +198,3 @@
+         "A69_REQUIRED_CHANGES": "Implement the recovered carriers through an Avelang layout/fragment representation before enabling waves 2/3; no A69 change made.",
+-        "PROBE_STATUS": "PASS: isolated B70 Kd/INV/Kr probes compiled, executed finite, and copied TTGIR/LLIR/AMDGCN/HSACO artifacts.",
++        "PROBE_STATUS": "ACCEPTED: independent torch matrix reconstruction matched every logical element (max_abs=0.0) for Kd/Qd, INV/Mqk, and Kr shapes; four-wave packet/result coverage was exact.",
+     }

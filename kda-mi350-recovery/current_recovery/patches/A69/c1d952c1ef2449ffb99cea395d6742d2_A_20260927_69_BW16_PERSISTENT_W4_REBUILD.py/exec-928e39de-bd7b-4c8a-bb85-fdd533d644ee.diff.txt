@@ -1,0 +1,6 @@
+@@ -126,5 +126,3 @@
+             h1_pkt = al.shuffle(h1[h_src_i], src_lane, 64)
+-            h2_pkt = al.shuffle(h2[h_src_i], src_lane, 64)
+             overlay_bf[h_pkt_row * 16 + h_pkt_col + q] = al.convert(h1_pkt, al.bf16)
+-            overlay_bf[h_pkt_row * 16 + h_pkt_col + q] = al.convert(h2_pkt, al.bf16)
+         al.syncthreads()

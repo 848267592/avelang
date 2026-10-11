@@ -1,0 +1,8 @@
+@@ -13,5 +13,5 @@
+     out = al.make_tensor(out_ptr, al.i32, al.make_layout((256,), (1,)))
+-    limit = al.make_tensor(limit_ptr, al.i32, al.make_layout((1,), (1,)))
++    limit = al.make_tensor(limit_ptr, al.i32, al.make_layout((1, 1), (1, 1)))
+     tid = al.thread_id(0)
+-    limit_value = limit[0]
++    limit_value = limit[0, 0]
+     i = 0

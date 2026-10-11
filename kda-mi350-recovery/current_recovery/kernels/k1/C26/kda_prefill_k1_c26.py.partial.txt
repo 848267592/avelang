@@ -1,0 +1,177 @@
+"""Native Avelang FlashKDA K1 (Prepare Kernel) Resource Baseline V2.
+
+Author: Antigravity
+Version: C_20260923_26_K1_FRONTEND_2D_RESIDENT_PIPELINE
+Target Machine: AMD Instinct MI300X (gfx942)
+Hard Targets:
+- Grid: (NT, 12, 1)
+- Workgroup: 128 threads (2 waves)
+- LDS: 8192 bytes
+- AGPR: 0
+- MFMA Skeleton: exactly 160 MFMA (32 BF16 + 128 FP32)
+"""
+
+from __future__ import annotations
+
+import math
+from typing import Final
+
+import torch
+import avelang
+import avelang.language as al
+
+
+HEADS: Final = 12
+HEAD_DIM: Final = 128
+CHUNK: Final = 32
+INV_BLOCK: Final = 16
+LOWER_BOUND: Final = -5.0
+L2NORM_EPS: Final = 1.0e-6
+LOG2_E: Final = 1.4426950408889634
+
+
+@avelang.jit
+def _kda_native_k1_kernel_v2(
+    q_ptr: al.Pointer(al.bf16),
+    k_ptr: al.Pointer(al.bf16),
+    g_ptr: al.Pointer(al.bf16),
+    beta_ptr: al.Pointer(al.f32),
+    a_log_ptr: al.Pointer(al.f32),
+    dt_bias_ptr: al.Pointer(al.f32),
+    ws_kd_ptr: al.Pointer(al.bf16),
+    ws_qd_ptr: al.Pointer(al.bf16),
+    ws_kr_ptr: al.Pointer(al.bf16),
+    ws_gt_ptr: al.Pointer(al.f32),
+    ws_inv_mqk_ptr: al.Pointer(al.f16),
+    scale: al.constexpr,
+    lower_bound: al.constexpr,
+    T: al.constexpr,
+    H: al.constexpr,
+    K: al.constexpr,
+    C: al.constexpr,
+    BC: al.constexpr,
+    NT: al.constexpr,
+):
+    # Global memory layouts
+    q = al.make_tensor(q_ptr, al.bf16, al.make_layout((T, H, K), (H * K, K, 1)))
+    k = al.make_tensor(k_ptr, al.bf16, al.make_layout((T, H, K), (H * K, K, 1)))
+    g = al.make_tensor(g_ptr, al.bf16, al.make_layout((T, H, K), (H * K, K, 1)))
+    beta = al.make_tensor(beta_ptr, al.f32, al.make_layout((T, H), (H, 1)))
+    a_log = al.make_tensor(a_log_ptr, al.f32, al.make_layout((H,), (1,)))
+    dt_bias = al.make_tensor(dt_bias_ptr, al.f32, al.make_layout((H, K), (K, 1)))
+
+    ws_kd = al.make_tensor(ws_kd_ptr, al.bf16, al.make_layout((H * NT, C, K), (C * K, K, 1)))
+    ws_qd = al.make_tensor(ws_qd_ptr, al.bf16, al.make_layout((H * NT, C, K), (C * K, K, 1)))
+    ws_kr = al.make_tensor(ws_kr_ptr, al.bf16, al.make_layout((H * NT, C, K), (C * K, K, 1)))
+    ws_gt = al.make_tensor(ws_gt_ptr, al.f32, al.make_layout((H * NT, K), (K, 1)))
+    ws_inv_mqk = al.make_tensor(
+        ws_inv_mqk_ptr, al.f16, al.make_layout((H * NT, 2, C, C), (2 * C * C, C * C, C, 1))
+    )
+
+    # Buffer Resource Descriptors for Frontend VMEM loads and Workspace stores
+    q_rsrc = al.amdgpu.make_rsrc(q, T * H * K * 2)
+    k_rsrc = al.amdgpu.make_rsrc(k, T * H * K * 2)
+    g_rsrc = al.amdgpu.make_rsrc(g, T * H * K * 2)
+    beta_rsrc = al.amdgpu.make_rsrc(beta, T * H * 4)
+    bias_rsrc = al.amdgpu.make_rsrc(dt_bias, H * K * 4)
+    ws_total_bytes = H * NT * C * K * 2
+    ws_kd_rsrc = al.amdgpu.make_rsrc(ws_kd, ws_total_bytes)
+    ws_qd_rsrc = al.amdgpu.make_rsrc(ws_qd, ws_total_bytes)
+    ws_kr_rsrc = al.amdgpu.make_rsrc(ws_kr, ws_total_bytes)
+
+    # LDS pool: exactly 8192 bytes = 2048 u32 words
+    # Partitioned without any overlap:
+    # Words 0..511:    lds_bf16_0 (1024 bf16 = 32x32 tile A in Phase 2)
+    # Words 512..1023:  lds_bf16_1 (1024 bf16 = 32x32 tile B in Phase 2)
+    # Words 1024..1151: lds_g_mid (128 floats for channels 0..127)
+    # Words 1152..1279: lds_g_last (128 floats for channels 0..127)
+    # Words 1280..1311: lds_q_inv_norm (32 floats for rows 0..31)
+    # Words 1312..1343: lds_k_inv_norm (32 floats for rows 0..31)
+    # Phase 3 (doubling & merge):
+    # Words 0..1023:   lds_mat0 (32x32 fp32 matrix)
+    # Words 1024..2047: lds_mat1 (32x32 fp32 matrix)
+    pool = al.make_shared((2048,), al.u32)
+    lds_g_mid = al.view(al.subview(pool, (1024,), (128,), (1,)), al.f32, al.make_layout((128,), (1,)))
+    lds_g_last = al.view(al.subview(pool, (1152,), (128,), (1,)), al.f32, al.make_layout((128,), (1,)))
+    lds_q_inv_norm = al.view(al.subview(pool, (1280,), (32,), (1,)), al.f32, al.make_layout((32,), (1,)))
+    lds_k_inv_norm = al.view(al.subview(pool, (1312,), (32,), (1,)), al.f32, al.make_layout((32,), (1,)))
+    lds_mat0 = al.view(al.subview(pool, (0,), (1024,), (1,)), al.f32, al.make_layout((32, 32), (1, 32)))
+    lds_mat1 = al.view(al.subview(pool, (1024,), (1024,), (1,)), al.f32, al.make_layout((32, 32), (1, 32)))
+
+    # Convert index coordinates to i32
+    tid = al.convert(al.thread_id(0), al.i32)
+    chunk_idx = al.convert(al.block_id(0), al.i32)
+    head_idx = al.convert(al.block_id(1), al.i32)
+
+    wave = tid >> 6
+    lane = tid & 63
+    lane_row = lane & 31
+    lane_group = lane >> 5
+    peer_lane = lane ^ 32
+
+    # 2D Resident Coordinates
+    t_row = lane >> 4       # 0..3
+    t_col = lane & 15       # 0..15
+    cta_row = (wave << 2) + t_row  # 0..7
+    col_base = t_col * 8    # 0, 8, ..., 120
+    col_word = col_base >> 1
+
+    pid = head_idx * NT + chunk_idx
+    t_off = chunk_idx * C
+
+    actual_len = C
+    if t_off + C > T:
+        rem = T - t_off
+        actual_len = rem if rem > 0 else 0
+
+    zero = al.convert(0.0, al.f32)
+    one = al.convert(1.0, al.f32)
+    eps = al.convert(1.0e-6, al.f32)
+    log2_e = al.convert(1.4426950408889634, al.f32)
+    scale_f = al.convert(scale, al.f32)
+    bound_f = al.convert(lower_bound, al.f32)
+    zero_bf16 = al.convert(0.0, al.bf16)
+    sel = al.convert(0x05040100, al.u32)
+    zero_i32 = al.convert(0, al.i32)
+    mask_ffff = al.convert(0xFFFF, al.i32)
+
+    # 1. Load dt_bias (8 floats per thread)
+    bias_byte_off = (head_idx * K + col_base) * 4
+    bias_w0 = al.amdgpu.raw_buffer_load_x4(bias_rsrc, bias_byte_off, zero_i32, 0)
+    bias_w1 = al.amdgpu.raw_buffer_load_x4(bias_rsrc, bias_byte_off + 16, zero_i32, 0)
+    bias_k = al.full((8,), zero, al.f32)
+    bias_k[0] = al.bitcast(bias_w0[0], al.f32)
+    bias_k[1] = al.bitcast(bias_w0[1], al.f32)
+    bias_k[2] = al.bitcast(bias_w0[2], al.f32)
+    bias_k[3] = al.bitcast(bias_w0[3], al.f32)
+    bias_k[4] = al.bitcast(bias_w1[0], al.f32)
+    bias_k[5] = al.bitcast(bias_w1[1], al.f32)
+    bias_k[6] = al.bitcast(bias_w1[2], al.f32)
+    bias_k[7] = al.bitcast(bias_w1[3], al.f32)
+
+    a_scale = al.exp(a_log[head_idx])
+
+    # 2. Phase 1.1: Persistent 2D Resident Load & L2 Norm (all 128 threads active)
+    # Full static unroll across 4 rows (12 x raw_buffer_load_x4)
+    r0 = cta_row * 4 + 0
+    r1 = cta_row * 4 + 1
+    r2 = cta_row * 4 + 2
+    r3 = cta_row * 4 + 3
+
+    # Row 0
+    q_norm_0 = al.full((8,), zero, al.f32)
+    k_norm_0 = al.full((8,), zero, al.f32)
+    gate_step_0 = al.full((8,), zero, al.f32)
+    if r0 < actual_len:
+        t_c0 = t_off + r0
+        byte_off_0 = (t_c0 * H + head_idx) * K * 2 + col_base * 2
+        qw0 = al.amdgpu.raw_buffer_load_x4(q_rsrc, byte_off_0, zero_i32, 0)
+        kw0 = al.amdgpu.raw_buffer_load_x4(k_rsrc, byte_off_0, zero_i32, 0)
+        gw0 = al.amdgpu.raw_buffer_load_x4(g_rsrc, byte_off_0, zero_i32, 0)
+
+        q_f0 = al.full((8,), zero, al.f32)
+        k_f0 = al.full((8,), zero, al.f32)
+        g_f0 = al.full((8,), zero, al.f32)
+        for j in al.range(4):
+            qw_j = qw0[j]
+            q_f0[2 * j + 0] = al.convert(al.bitcast(al.convert(qw_j & mask_ffff, al.u16), al.bf16), al.f32

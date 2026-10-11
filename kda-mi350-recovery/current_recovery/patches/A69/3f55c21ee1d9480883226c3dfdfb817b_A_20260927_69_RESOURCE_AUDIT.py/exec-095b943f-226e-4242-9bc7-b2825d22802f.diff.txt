@@ -1,0 +1,5 @@
+@@ -63,3 +63,3 @@
+ def _metadata(text: str, name: str) -> int:
+-    match = re.search(rf"^\s+\.{re.escape(name)}:\s+(\d+)\s*$", text, re.M)
++    match = re.search(rf"^\s+(?:-\s+)?\.{re.escape(name)}:\s+(\d+)\s*$", text, re.M)
+     if not match:

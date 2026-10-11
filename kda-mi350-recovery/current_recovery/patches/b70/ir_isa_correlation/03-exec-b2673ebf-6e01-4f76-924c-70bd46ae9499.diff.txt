@@ -1,0 +1,20 @@
+@@ -111,2 +111,3 @@
+         "pinned": pinned,
++        "layout_definitions": layouts,
+         "MMA1_LOGICAL_MAP": {
+@@ -156,3 +157,4 @@
+                 "A_shared": "(((64*w)&128)<<4) | (r<<7) | ((r<<3) ^ (b>>1))",
+-                "H_shared": "(32*w) ^ ((b<<5) | (l<<1))",
++                "H_read": "(r<<7) | ((r<<3) ^ (b>>1))",
++                "H_write": "(32*w) ^ ((b<<5) | (l<<1))",
+                 "A_fp16": "(((64*w)&128)<<3) | (r<<6) | (((t<<2)&56) ^ (b>>1))",
+@@ -178,3 +180,3 @@
+                     "producer": "base 0/4096 + ((t<<4) ^ (t&120)) and +8; each packet 8 B",
+-                    "consumer": "base 0/4096 + A_shared + {0,32,64,96}; each load <4xi16> = 8 B",
++                    "consumer": "base 0/4096 + A_shared + {0,32,64,96}; H reads are 28672 + H_read + {0,32,64,96}; each packet load is 8 B",
+                     "mfma": "8 BF16 calls; first physical source is H, second is Kd; C continuation is tied",
+@@ -186,3 +188,3 @@
+                     "producer": "base 8192/12288 + ((t<<4) ^ (t&120)) and +8; each packet 8 B",
+-                    "consumer": "base 8192/12288 + A_shared + {0,32,64,96}; each load <4xi16> = 8 B",
++                    "consumer": "base 8192/12288 + A_shared + {0,32,64,96}; H reads are 28672 + H_read + {0,32,64,96}; each packet load is 8 B",
+                     "mfma": "8 BF16 calls; H is physical src0, Qd is physical src1; result continues into output/Mqk accumulator chain",

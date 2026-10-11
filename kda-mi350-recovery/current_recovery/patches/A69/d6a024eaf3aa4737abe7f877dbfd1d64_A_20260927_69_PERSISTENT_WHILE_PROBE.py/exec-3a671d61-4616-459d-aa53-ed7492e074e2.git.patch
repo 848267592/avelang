@@ -1,0 +1,10 @@
+diff --git a/A_20260927_69_PERSISTENT_WHILE_PROBE.py b/A_20260927_69_PERSISTENT_WHILE_PROBE.py
+--- a/A_20260927_69_PERSISTENT_WHILE_PROBE.py
++++ b/A_20260927_69_PERSISTENT_WHILE_PROBE.py
+@@ -15,4 +15,5 @@
+     tid = al.thread_id(0)
++    limit_value = limit[0]
+     i = 0
+-    while i < limit[0]:
++    while i < limit_value:
+         out[tid] = i

@@ -1,0 +1,16 @@
+diff --git a/A_20260927_69_W4_OWNERSHIP_LEDGER.json b/A_20260927_69_W4_OWNERSHIP_LEDGER.json
+--- a/A_20260927_69_W4_OWNERSHIP_LEDGER.json
++++ b/A_20260927_69_W4_OWNERSHIP_LEDGER.json
+@@ -122,7 +122,7 @@
+       "warp_coordinate": "warp_m=wave//2; warp_n=wave%2",
+-      "wave_0": "top-left 16-row x 8-column logical subownership of the 32x16 result",
+-      "wave_1": "top-right 16-row x 8-column logical subownership of the 32x16 result",
+-      "wave_2": "bottom-left 16-row x 8-column logical subownership of the 32x16 result",
+-      "wave_3": "bottom-right 16-row x 8-column logical subownership of the 32x16 result",
+-      "fragment_note": "The four-lane FP32 MFMA fragment is physically banked by the AMD MFMA v3 lowering; its exact register continuation is represented by the pinned ISA bank sequences, not by a guessed row-major scalar array.",
++      "wave_0": "the first #mma1 warp coordinate",
++      "wave_1": "the second #mma1 warp coordinate",
++      "wave_2": "the third #mma1 warp coordinate",
++      "wave_3": "the fourth #mma1 warp coordinate",
++      "fragment_note": "The pinned artifacts expose the four-wave layout and the generated physical fragment banks, but do not justify a scalar row-major 16x8-per-wave table. A69 must retain the #mma1/dot_op lowering and compare the resulting raw fragments; it must not invent a lane-to-register map.",
+       "evidence": "#mma1 definition golden_reference.ttgir:8 and 32x16 result operations at golden_reference.ttgir:426-479"

@@ -1,0 +1,46 @@
+@@ -112,2 +112,21 @@
+ 
++The exact pinned phase output banks are:
++
++| phase | output/continuation banks |
++|---|---|
++| Kd/H1,H2 | `v[96:99]` for ISA 454-472, then `v[18:21]` for 479-499 |
++| INV | `v[18:21]` zero form at 576, then `v[26:29]` at 578 |
++| Qd/output pre-Mqk | `v[22:25]` at 552-567, `v[18:21]` at 568-571, `v[94:97]` at 574/596 |
++| Mqk | `v[94:97]` at 601-603 |
++| Kr1 | `v[2:5]` at 710/715 |
++| Kr2 | `v[6:9]` at 719/724 |
++
++The pinned ISA does not name the source logical lane in each `ds_*` address.
++Therefore the slot bases, packet formulas, instruction operands, and reuse
++barriers are exact, but a complete per-wave byte-address formula for every
++temporally reused `ds_*` operand in the production loop remains an explicit
++missing fact. The missing artifact is a lane/wave-address trace (or the
++lowered shared-layout conversion) for the pinned `#shared/#shared1/#shared2/
++#shared3/#shared4` memdesc instances, not another numerical matrix check.
++
+ ## PERMUTE_MAP
+@@ -126,2 +145,5 @@
+ 37-60 give the exact bpermute address/select sequence before the tied MFMA.
++The physical instruction sequences are exact; the logical source/destination
++labels for every production-loop permute remain tied to the missing shared
++layout address trace described above.
+ 
+@@ -188,3 +210,3 @@
+         "LDS_WAVE_MAP": {
+-            "status": "RECOVERED_SLOT_AND_OPCODE_LEVEL",
++            "status": "PARTIAL_EXACT_SLOTS_AND_OPCODES",
+             "pool_bytes": 30720,
+@@ -192,5 +214,6 @@
+             "waitcnt_per_chunk": 36,
++            "missing": "per-wave byte-address formulas and logical labels for every temporally reused pinned ds_* memdesc instance",
+         },
+         "PERMUTE_MAP": {
+-            "status": "RECOVERED_PHYSICAL_SEQUENCE",
++            "status": "PARTIAL_PHYSICAL_SEQUENCE_EXACT_LOGICAL_LABELS_MISSING",
+             "evidence": "B70 probe ISA plus pinned AITER ISA",
+@@ -198,3 +221,3 @@
+         "A69_REQUIRED_CHANGES": "Implement the recovered carriers through an Avelang layout/fragment representation before enabling waves 2/3; no A69 change made.",
+-        "PROBE_STATUS": "ACCEPTED: independent torch matrix reconstruction matched every logical element (max_abs=0.0) for Kd/Qd, INV/Mqk, and Kr shapes; four-wave packet/result coverage was exact.",
++        "PROBE_STATUS": "ACCEPTED_FOR_LOGICAL_MAP_ONLY: independent torch reconstruction matched every element (max_abs=0.0) and four-wave packet/result coverage was exact; LDS_WAVE_MAP remains partial because pinned temporally reused ds_* addresses lack logical lane labels.",
+     }

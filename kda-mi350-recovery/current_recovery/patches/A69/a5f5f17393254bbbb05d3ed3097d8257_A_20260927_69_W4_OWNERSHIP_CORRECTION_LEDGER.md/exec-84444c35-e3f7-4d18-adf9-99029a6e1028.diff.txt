@@ -1,0 +1,36 @@
+@@ -42,2 +42,35 @@
+ 
++## Exact evidence boundary
++
++The problematic stages are `tt.dot` values whose result type is
++`tensor<32x16xf32, #mma1>` and whose operands are `dot_op<parent=#mma1,
++kWidth=4>`: Kd/H1 and Kd/H2 at TTGIR lines 306 and 309, INV/U at line 351,
++Qd/Mqk at lines 359 and 364, and the loop-carried copies at lines 427-466 and
++475. The encoding is `#mma1 = amd_mfma{version=3, warpsPerCTA=[2,2],
++instrShape=[16,16,16], isTransposed=true}`; its operand packet layouts are
++`#blocked1` (`[1,8]`, `[8,8]`, `[4,1]`, order `[1,0]`) and `#blocked4`
++(` [1,4]`, `[8,8]`, `[4,1]`, order `[1,0]`).
++
++The corresponding pinned ISA only shows physical carrier/continuation facts:
++Kd chains at ISA lines 454-499, the INV pair at 576-578, the Mqk pair at
++601-603, and the later Qd/Kr chains at 787-840 and 934-955. The pinned LLIR
++contains the lowered `llvm.amdgcn.mfma` operations and tied physical
++continuations, but neither LLIR nor the B67 dot audit annotates the inverse
++mapping from each of the four returned ordinary-V FP32 registers to the
++`#mma1` logical `(row, col)` element. B67 proves tied-bank continuation and
++hazard behavior only; it does not prove the `#mma1` distribution.
++
++An A69-only compile/store probe could reveal the ordinary-V primitive's own
++`(wave, lane, frag)` register carrier and verify candidate tied banks. It
++cannot, by itself, recover the pinned `#mma1` logical carrier: a numerical
++store of a candidate map has no reference label telling which `#mma1` element
++that register was intended to represent, and the pinned reference's later LDS
++permutes obscure that label. The smallest missing fact is therefore the
++all-four-wave mapping
++`(wave,lane,frag) -> (logical row, logical col)` plus the exact packing/permute
++between the `#mma1` result and the ordinary-V four-register carrier (an
++all-wave per-lane fragment snapshot or an equivalent Avelang layout conversion
++is sufficient). Without that fact, removing the guards is an unsafe layout
++guess rather than a first-divergence fix.
++
+ ## Bounded correction decision

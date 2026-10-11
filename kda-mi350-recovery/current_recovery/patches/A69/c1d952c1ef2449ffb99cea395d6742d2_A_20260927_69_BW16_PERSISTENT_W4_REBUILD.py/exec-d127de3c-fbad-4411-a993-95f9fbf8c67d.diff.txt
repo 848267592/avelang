@@ -1,0 +1,36 @@
+@@ -144,2 +144,3 @@
+                     b_frag[q] = overlay_bf[(k_base + q) * 16 + out_col]
++                al.amdgpu.s_nop(1)
+                 if k_step == 0:
+@@ -168,2 +169,3 @@
+                     b_frag[q] = overlay_bf[(k_base + q) * 16 + out_col]
++                al.amdgpu.s_nop(1)
+                 if k_step == 0:
+@@ -217,2 +219,3 @@
+                 b_frag[q] = overlay_f16[(k_base + q) * 16 + out_col]
++            al.amdgpu.s_nop(1)
+             acc_u = al.amdgpu.mfma_16x16x16_f16_f32_vgpr(a_frag, b_frag, acc_u)
+@@ -224,2 +227,3 @@
+                 b_frag[q] = overlay_f16[(k_base + q) * 16 + out_col]
++            al.amdgpu.s_nop(1)
+             acc_u = al.amdgpu.mfma_16x16x16_f16_f32_vgpr(a_frag, b_frag, acc_u)
+@@ -254,2 +258,3 @@
+                 b_frag[q] = overlay_f16[(k_base + q) * 16 + out_col]
++            al.amdgpu.s_nop(1)
+             acc_mqk = al.amdgpu.mfma_16x16x16_f16_f32_vgpr(a_frag, b_frag, acc_mqk)
+@@ -261,2 +266,3 @@
+                 b_frag[q] = overlay_f16[(k_base + q) * 16 + out_col]
++            al.amdgpu.s_nop(1)
+             acc_mqk = al.amdgpu.mfma_16x16x16_f16_f32_vgpr(a_frag, b_frag, acc_mqk)
+@@ -290,2 +296,3 @@
+                     b_frag[q] = overlay_bf[(k_base + q) * 16 + out_col]
++                al.amdgpu.s_nop(1)
+                 if k_step == 0:
+@@ -315,2 +322,3 @@
+                     b_frag[q] = overlay_bf[(k_base + q) * 16 + out_col]
++                al.amdgpu.s_nop(1)
+                 if k_step == 0:
+@@ -364,2 +372,3 @@
+                 b[q] = overlay_bf[(k_base + q) * 16 + out_col]
++            al.amdgpu.s_nop(1)
+             if k_step == 0:

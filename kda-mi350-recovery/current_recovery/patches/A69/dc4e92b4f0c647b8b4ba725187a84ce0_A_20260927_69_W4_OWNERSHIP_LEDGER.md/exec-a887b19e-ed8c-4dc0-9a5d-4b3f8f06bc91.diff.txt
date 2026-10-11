@@ -1,0 +1,5 @@
+@@ -19,3 +19,3 @@
+ 
+-The `mma1` result has warp coordinate `(warp_m, warp_n)=(wave//2,wave%2)`: waves 0/1 cover the top 16-row half and waves 2/3 the bottom half; within each half waves 0/2 are the low-N side and waves 1/3 the high-N side. The `mma` result is `[4,1]`, so waves 0/1/2/3 own the four consecutive 16-row H fragments. The TTGIR evidence is `golden_reference.ttgir:7-8,426-479,497-509`.
++The `mma1` result has the exact encoded warp arrangement `[2,2]`; the pinned artifacts do not support replacing that MFMA fragment layout with a guessed scalar 16x8-per-wave table. The `mma` result is `[4,1]`, so its four wave coordinates are the four consecutive H-fragment coordinates. The TTGIR evidence is `golden_reference.ttgir:7-8,426-479,497-509`.
+ 

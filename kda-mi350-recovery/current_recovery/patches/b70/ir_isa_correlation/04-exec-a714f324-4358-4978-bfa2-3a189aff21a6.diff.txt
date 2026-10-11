@@ -1,0 +1,20 @@
+@@ -315,3 +315,4 @@
+ A_fp16   = (((64*w)&128)<<3) | (r<<6) | (((t<<2)&56) ^ (b>>1))
+-H_shared = (32*w) ^ ((b<<5) | (l<<1))
++H_read   = (r<<7) | ((r<<3) ^ (b>>1))
++H_write  = (32*w) ^ ((b<<5) | (l<<1))
+ U0       = ((((64*w)&128)>>2) | (b<<4) | (r<<1)) ^ b
+@@ -335,3 +336,5 @@
+ 
+-`#shared` consumers read `base+A_shared+{{0,32,64,96}}`; INV/Mqk read
++`#shared` consumers read `base+A_shared+{{0,32,64,96}}`; `#shared3` H reads
++are `28672+H_read+{{0,32,64,96}}`, while H scalar writes use
++`28672+H_write+{{0,136,272,408}}`. INV/Mqk read
+ `base+A_fp16+{{0,32}}`; U reads are `28672+U2` and `28672+(U2^32)`.
+@@ -342,2 +345,6 @@
+ 
++For the four result fragment scalars `f=0..3`, the 28672 U writes are
++`28672+U0`, `28672+U0+64`, `28672+(U0^136)`, and
++`28672+(U0^136)+64`.
++
+ The exact stage/reuse/barrier links are recorded in the JSON ledger.  The

@@ -1,0 +1,8 @@
+diff --git a/A_20260927_69_BENCHMARK_TRUE_BEST.py b/A_20260927_69_BENCHMARK_TRUE_BEST.py
+--- a/A_20260927_69_BENCHMARK_TRUE_BEST.py
++++ b/A_20260927_69_BENCHMARK_TRUE_BEST.py
+@@ -34,3 +34,3 @@
+ W4_SHA = "85470da1877fcd49db1b9adee0129fff9787e7953d221817198ce2434cd0ac16"
+-W4_SYMBOL = "_flash_kda_segment_kernel.kd"
++W4_SYMBOL = "_flash_kda_segment_kernel"
+ AITer_COMMIT = "7bb44998274fa679ece0a37bf8426ab780b1837d"

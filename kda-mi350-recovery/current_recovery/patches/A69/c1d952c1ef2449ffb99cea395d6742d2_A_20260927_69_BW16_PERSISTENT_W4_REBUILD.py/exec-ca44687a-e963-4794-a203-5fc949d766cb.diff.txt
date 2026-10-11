@@ -1,0 +1,5 @@
+@@ -227,3 +227,3 @@
+         for q in al.range(4):
+-            mqk[mqk_row * 32 + mqk_col + q] = inv_mqk[ws_idx, 1, mqk_row, mqk_col + q] if False else inv_mqk[ws_idx, 1, inv_row, inv_col_base + q]
++            mqk[inv_row * 32 + inv_col_base + q] = inv_mqk[ws_idx, 1, inv_row, inv_col_base + q]
+         al.syncthreads()

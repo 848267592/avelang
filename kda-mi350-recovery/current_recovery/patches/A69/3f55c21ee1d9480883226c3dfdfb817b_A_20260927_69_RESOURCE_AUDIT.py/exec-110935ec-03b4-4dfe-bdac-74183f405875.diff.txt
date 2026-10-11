@@ -1,0 +1,58 @@
+@@ -83,2 +83,16 @@
+ 
++def _function_span(text: str) -> tuple[int, int]:
++    match = re.search(
++        rf"Name: {re.escape(SYMBOL)} \([^\n]+\)\n\s+Value: 0x([0-9A-Fa-f]+)\n\s+Size: (\d+)",
++        text,
++    )
++    if not match:
++        raise RuntimeError(f"missing {SYMBOL} function symbol")
++    return int(match.group(1), 16), int(match.group(2))
++
++
++def _physical_max_lines(lines: list[tuple[int, str]], prefix: str) -> int:
++    return _physical_max("\n".join(line for _, line in lines), prefix)
++
++
+ def _instruction_lines(text: str) -> list[tuple[int, str]]:
+@@ -134,3 +148,10 @@
+     isa = ISA.read_text()
+-    loop = [(addr, line) for addr, line in _instruction_lines(isa) if LOOP_START <= addr <= LOOP_END]
++    all_instructions = _instruction_lines(isa)
++    function_start, function_size = _function_span(readobj)
++    kernel_instructions = [
++        (addr, line)
++        for addr, line in all_instructions
++        if function_start <= addr < function_start + function_size
++    ]
++    loop = [(addr, line) for addr, line in kernel_instructions if LOOP_START <= addr <= LOOP_END]
+ 
+@@ -144,4 +165,6 @@
+     sgpr_spill = _metadata(readobj, "sgpr_spill_count")
+-    physical_vgpr = _physical_max(isa, "v")
+-    physical_sgpr = _physical_max(isa, "s")
++    physical_vgpr = _physical_max_lines(kernel_instructions, "v")
++    physical_sgpr = _physical_max_lines(kernel_instructions, "s")
++    whole_object_physical_vgpr = _physical_max(isa, "v")
++    whole_object_physical_sgpr = _physical_max(isa, "s")
+     occupancy = _occupancy()
+@@ -152,9 +175,9 @@
+         "mfma_f16": _count(loop, r"v_mfma_f32_16x16x16_f16\b"),
+-        "vmem_load": _count(loop, r"(?:global|flat|buffer)_load\b"),
+-        "vmem_store": _count(loop, r"(?:global|flat|buffer)_store\b"),
+-        "lds_read": _count(loop, r"ds_read\b"),
+-        "lds_write": _count(loop, r"ds_write\b"),
++        "vmem_load": _count(loop, r"(?:global|flat|buffer)_load(?:_|\b)"),
++        "vmem_store": _count(loop, r"(?:global|flat|buffer)_store(?:_|\b)"),
++        "lds_read": _count(loop, r"ds_read(?:_|\b)"),
++        "lds_write": _count(loop, r"ds_write(?:_|\b)"),
+         "barrier": _count(loop, r"s_barrier\b"),
+         "waitcnt": _count(loop, r"s_waitcnt\b"),
+-        "v_perm": _count(loop, r"v_perm\b"),
++        "v_perm": _count(loop, r"v_perm(?:_|\b)"),
+         "ds_bpermute": _count(loop, r"ds_bpermute\b"),
+@@ -174,2 +197,4 @@
+         "max_physical_sgpr": f"s{physical_sgpr}",
++        "whole_object_max_physical_vgpr": f"v{whole_object_physical_vgpr}",
++        "whole_object_max_physical_sgpr": f"s{whole_object_physical_sgpr}",
+         "vgpr_spill": vgpr_spill,

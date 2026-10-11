@@ -1,0 +1,66 @@
+@@ -37,4 +37,6 @@
+     final_state_ptr: al.Pointer(al.f32),
++    debug_ptr: al.Pointer(al.f32),
+     T: al.constexpr,
+     NT: al.constexpr,
++    DEBUG: al.constexpr,
+ ):
+@@ -63,2 +65,7 @@
+     )
++    debug = al.make_tensor(
++        debug_ptr,
++        al.f32,
++        al.make_layout((HEADS * 8 * HD * V,), (1,)),
++    )
+ 
+@@ -184,2 +191,5 @@
+                 u_pre[acc_i] = (value - pred) * beta_sigmoid
++                if DEBUG:
++                    debug[((head * 8 + 0) * HD + row) * V + w0 + out_col] = pred
++                    debug[((head * 8 + 1) * HD + row) * V + w0 + out_col] = u_pre[acc_i]
+ 
+@@ -216,2 +226,6 @@
+             acc_u = al.amdgpu.mfma_hazard_drain(acc_u, 6)
++            if DEBUG:
++                for acc_i in al.range(4):
++                    row = wave * 16 + (lane >> 4) * 4 + acc_i
++                    debug[((head * 8 + 2) * HD + row) * V + w0 + (lane & 15)] = acc_u[acc_i]
+         al.syncthreads()
+@@ -249,2 +263,6 @@
+             acc_mqk = al.amdgpu.mfma_hazard_drain(acc_mqk, 6)
++            if DEBUG:
++                for acc_i in al.range(4):
++                    row = wave * 16 + (lane >> 4) * 4 + acc_i
++                    debug[((head * 8 + 4) * HD + row) * V + w0 + (lane & 15)] = acc_mqk[acc_i]
+         al.syncthreads()
+@@ -313,2 +331,5 @@
+                     out[t, head, w0 + out_col] = al.convert(output_value, al.bf16)
++                if DEBUG:
++                    debug[((head * 8 + 3) * HD + row) * V + w0 + out_col] = acc_qd1[acc_i] + acc_qd2[acc_i]
++                    debug[((head * 8 + 5) * HD + row) * V + w0 + out_col] = output_value
+         al.syncthreads()
+@@ -356,2 +377,5 @@
+             h2[acc_i] = h2[acc_i] * gt[ws_idx, 64 + row] + acc_kr2[acc_i]
++            if DEBUG:
++                debug[((head * 8 + 6) * HD + row) * V + w0 + h_col] = h1[acc_i]
++                debug[((head * 8 + 7) * HD + row) * V + w0 + h_col] = h2[acc_i]
+         al.syncthreads()
+@@ -365,3 +389,3 @@
+ 
+-def a69_bw16_k2(*, workspace, v, beta, initial_state):
++def a69_bw16_k2(*, workspace, v, beta, initial_state, debug: bool = False):
+     """Launch one persistent `(8,12,1)` A69 K2 grid."""
+@@ -372,2 +396,3 @@
+     nt_scalar = torch.tensor([[nt]], device=v.device, dtype=torch.int32)
++    debug_data = torch.zeros((HEADS * 8 * HD * V,), device=v.device, dtype=torch.float32)
+     _a69_bw16_k2_persistent[lambda: ((V // BW, HEADS, 1), (WG, 1, 1))](
+@@ -384,6 +409,8 @@
+         final_state,
++        debug_data,
+         T,
+         nt,
++        debug,
+         num_warps=4,
+     )
+-    return out, final_state
++    return out, final_state, debug_data if debug else None

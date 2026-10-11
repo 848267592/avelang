@@ -1,0 +1,16 @@
+@@ -127,2 +127,15 @@
+ 
++## A69 differential ledger
++
++| phase | current A69 ownership | pinned AITER ownership | required change |
++|---|---|---|---|
++| Kd/Qd | `if wave<2`; `a_row=16*w+(l&15)`, `out_col=l&15` | all four waves, blocked1 packets and paired `#mma1` carrier | use blocked1/dot-op carrier; do not only widen predicate |
++| INV/Mqk | `if wave<2`; same row-major carrier | blocked4 packets, `#mma1` result, even-wave logical store | route through exact `#mma1`/shared4 conversion |
++| U | two-wave FP16 result is written as A69 row-major overlay | `#mma1` result truncated and staged through shared4 | preserve paired-wave fragment before overlay |
++| Kr1/Kr2 | all waves; packet load formula already matches blocked ownership | all waves, `#mma` carrier plus bpermute exchange | retain packet formula, replace result carrier/exchange |
++
++The A69 source locations are Kd/Qd lines 133-177, INV/Mqk lines 197-267,
++output/U lines 329-349, and Kr lines 351-379. The pinned target operations
++are TTGIR lines 298-309, 347-367, 475-509 and the ISA chains listed above.
++
+ ## A69_REQUIRED_CHANGES

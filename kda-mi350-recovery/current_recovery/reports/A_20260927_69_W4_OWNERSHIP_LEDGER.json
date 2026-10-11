@@ -1,0 +1,204 @@
+{
+  "artifact": "A_20260927_69_BW16_PERSISTENT_W4_REBUILD",
+  "purpose": "Pinned BW16/W4/S2 ownership and persistent-loop reconstruction before A69 implementation",
+  "provenance": {
+    "aiter_commit": "7bb44998274fa679ece0a37bf8426ab780b1837d",
+    "aiter_hsaco_sha256": "85470da1877fcd49db1b9adee0129fff9787e7953d221817198ce2434cd0ac16",
+    "aiter_source": "third_party/aiter/aiter/ops/triton/_triton_kernels/chunk_delta_attn/flash_kda.py",
+    "aiter_ttgir": "test/examples/kda/reports/C_20260925_67_BW16_W4_MACHINE_GOLDEN_AUDIT/golden_reference.ttgir",
+    "aiter_isa": "test/examples/kda/reports/C_20260925_67_BW16_W4_MACHINE_GOLDEN_AUDIT/golden_reference.isa",
+    "frozen_c67_ledger": "test/examples/kda/reports/C_20260925_67_BW16_W4_MACHINE_GOLDEN_AUDIT/golden_machine_ledger.json",
+    "math_reference": "A56 BW64; used only for recurrence semantics"
+  },
+  "launch_contract": {
+    "grid": [8, 12, 1],
+    "threads_per_block": 256,
+    "waves_per_block": 4,
+    "threads_per_wave": 64,
+    "bw": 16,
+    "num_stages": 2,
+    "persistent_sequence": "one device loop over n_chunks; state H1/H2 remains live between iterations",
+    "source_evidence": "flash_kda.py:403-445; the pinned production kernel loads H1/H2 once and executes for j in range(n_chunks)"
+  },
+  "layout_definitions": {
+    "blocked": {
+      "sizePerThread": [8, 1],
+      "threadsPerWarp": [8, 8],
+      "warpsPerCTA": [1, 4],
+      "order": [0, 1],
+      "use": "Kr [64,32] packet/source layout",
+      "evidence": "golden_reference.ttgir:1"
+    },
+    "blocked1": {
+      "sizePerThread": [1, 8],
+      "threadsPerWarp": [8, 8],
+      "warpsPerCTA": [4, 1],
+      "order": [1, 0],
+      "use": "Kd/Qd [32,64] packet/source layout",
+      "evidence": "golden_reference.ttgir:2,160-164,400-410"
+    },
+    "blocked2": {
+      "sizePerThread": [1, 4],
+      "threadsPerWarp": [16, 4],
+      "warpsPerCTA": [4, 1],
+      "order": [1, 0],
+      "use": "H1/H2 [64,16] initial-state load layout",
+      "evidence": "golden_reference.ttgir:3,128-132"
+    },
+    "blocked3": {
+      "sizePerThread": [1, 2],
+      "threadsPerWarp": [8, 8],
+      "warpsPerCTA": [4, 1],
+      "order": [1, 0],
+      "use": "V/U [32,16] token/value layout",
+      "evidence": "golden_reference.ttgir:4,440-450"
+    },
+    "blocked4": {
+      "sizePerThread": [1, 4],
+      "threadsPerWarp": [8, 8],
+      "warpsPerCTA": [4, 1],
+      "order": [1, 0],
+      "use": "INV/Mqk [32,32] packet/source layout",
+      "evidence": "golden_reference.ttgir:5,154-165,352-356,461-463"
+    },
+    "mma": {
+      "warpsPerCTA": [4, 1],
+      "instrShape": [16, 16, 16],
+      "isTransposed": true,
+      "use": "Kr/H recurrence [64,16] result layout",
+      "evidence": "golden_reference.ttgir:7,495-509"
+    },
+    "mma1": {
+      "warpsPerCTA": [2, 2],
+      "instrShape": [16, 16, 16],
+      "isTransposed": true,
+      "use": "Kd/pred, INV, Qd, Mqk/output [32,16] result layout",
+      "evidence": "golden_reference.ttgir:8,426-479"
+    },
+    "shared_packets": {
+      "kd_qd": "#shared: vec=4, perPhase=1, maxPhase=16, order=[1,0]",
+      "inv_mqk": "#shared1: vec=4, perPhase=2, maxPhase=8, order=[1,0]",
+      "kr": "#shared2: vec=1, perPhase=1, maxPhase=1, order=[0,1]",
+      "h_bf16": "#shared3: vec=4, perPhase=1, maxPhase=16, order=[0,1]",
+      "u_bf16": "#shared4: vec=4, perPhase=2, maxPhase=8, order=[0,1]",
+      "evidence": "golden_reference.ttgir:9-13"
+    }
+  },
+  "wave_roles": {
+    "wave_id": "lane_id // 64; lane_id is 0..255 within the block",
+    "blocked1_kd_qd": {
+      "wave_0": "rows 0..7, all 64 K columns",
+      "wave_1": "rows 8..15, all 64 K columns",
+      "wave_2": "rows 16..23, all 64 K columns",
+      "wave_3": "rows 24..31, all 64 K columns",
+      "per_lane_packet": "row=8*wave+(lane%64)//8; col0=8*(lane%8); payload is col0..col0+7",
+      "evidence": "blocked1 attributes plus source tensor 32x64 loads at golden_reference.ttgir:422-423,462-463"
+    },
+    "blocked4_inv_mqk": {
+      "wave_0": "rows 0..7, all 32 columns",
+      "wave_1": "rows 8..15, all 32 columns",
+      "wave_2": "rows 16..23, all 32 columns",
+      "wave_3": "rows 24..31, all 32 columns",
+      "per_lane_packet": "row=8*wave+(lane%64)//8; col0=4*(lane%8); payload is col0..col0+3",
+      "evidence": "blocked4 attributes plus local stores at golden_reference.ttgir:403-406"
+    },
+    "blocked3_v_u": {
+      "wave_0": "rows 0..7, columns 0..15",
+      "wave_1": "rows 8..15, columns 0..15",
+      "wave_2": "rows 16..23, columns 0..15",
+      "wave_3": "rows 24..31, columns 0..15",
+      "per_lane_packet": "row=8*wave+(lane%64)//8; col0=2*(lane%8); payload is col0..col0+1",
+      "evidence": "blocked3 attributes and V conversion at golden_reference.ttgir:440-450"
+    },
+    "blocked_kr": {
+      "wave_0": "all 64 K rows, columns 0..7",
+      "wave_1": "all 64 K rows, columns 8..15",
+      "wave_2": "all 64 K rows, columns 16..23",
+      "wave_3": "all 64 K rows, columns 24..31",
+      "per_lane_packet": "row0=8*(lane%8); col=8*wave+(lane//8); payload is row0..row0+7",
+      "evidence": "blocked attributes plus Kr source/store at golden_reference.ttgir:378-385,411-414"
+    },
+    "mma1_result": {
+      "warp_coordinate": "warp_m=wave//2; warp_n=wave%2",
+      "wave_0": "the first #mma1 warp coordinate",
+      "wave_1": "the second #mma1 warp coordinate",
+      "wave_2": "the third #mma1 warp coordinate",
+      "wave_3": "the fourth #mma1 warp coordinate",
+      "fragment_note": "The pinned artifacts expose the four-wave layout and the generated physical fragment banks, but do not justify a scalar row-major 16x8-per-wave table. A69 must retain the #mma1/dot_op lowering and compare the resulting raw fragments; it must not invent a lane-to-register map.",
+      "evidence": "#mma1 definition golden_reference.ttgir:8 and 32x16 result operations at golden_reference.ttgir:426-479"
+    },
+    "mma_kr_result": {
+      "wave_0": "rows 0..15 of the 64x16 H1/H2 result",
+      "wave_1": "rows 16..31",
+      "wave_2": "rows 32..47",
+      "wave_3": "rows 48..63",
+      "evidence": "#mma definition golden_reference.ttgir:7 and Kr dot operations at golden_reference.ttgir:497-509"
+    }
+  },
+  "pinned_isa_operand_and_accumulator_banks": {
+    "kd_chain": {
+      "first_step": "A=v[110:111], B=v[18:19], C=0, D=v[96:99]",
+      "continuations": [
+        "A=v[112:113], B=v[22:23], C=v[96:99]",
+        "A=v[114:115], B=v[36:37], C=v[96:99]",
+        "A=v[116:117], B=v[92:93], C=v[96:99]",
+        "A=v[118:119], B=v[20:21], C=v[96:99]",
+        "A=v[106:107], B=v[24:25], C=v[18:21]",
+        "A=v[120:121], B=v[38:39], C=v[18:21]",
+        "A=v[108:109], B=v[94:95], C=v[18:21]"
+      ],
+      "evidence": "golden_reference.isa:454,461,466,472,479,484,490,499"
+    },
+    "inv_two_step": {
+      "step0": "A=v[22:23], B=v[122:123], C=0, D=v[18:21]",
+      "step1": "A=v[24:25], B=v[124:125], C=v[18:21], D=v[26:29]",
+      "evidence": "golden_reference.isa:576-578"
+    },
+    "mqk_two_step": {
+      "step0": "A=v[104:105], B=v[110:111], C=v[94:97]",
+      "step1": "A=v[100:101], B=v[106:107], C=v[94:97]",
+      "evidence": "golden_reference.isa:601-603"
+    },
+    "kr_chains": {
+      "h1": "C=v[2:5], then v[2:5]; four K steps use the pinned BF16 tied continuation",
+      "h2": "C=v[6:9], then v[6:9]; four K steps use the pinned BF16 tied continuation",
+      "evidence": "golden_reference.isa:710-724 and 1111-1117"
+    },
+    "machine_count": "24 MFMA instructions per chunk per wave: 20 BF16 + 4 FP16; C67 frozen ledger is the authority for counts, not a new audit",
+    "evidence": "golden_machine_ledger.json:per_chunk_loop_body_lbb0_5"
+  },
+  "lds_contract": {
+    "dynamic_bytes": 30720,
+    "per_chunk_writes": 30,
+    "per_chunk_reads": 44,
+    "per_chunk_barriers": 12,
+    "per_chunk_waitcnt": 36,
+    "per_chunk_v_perm": 12,
+    "phase_packets": [
+      "Kd1/Kd2: blocked1 -> #shared",
+      "INV/Mqk: blocked4 -> #shared1",
+      "H BF16: #mma/#blocked2 -> #shared3",
+      "U BF16: #mma1 -> #shared4",
+      "Kr1/Kr2: blocked -> #shared2"
+    ],
+    "evidence": "golden_reference.ttgir:160-167,400-414; golden_machine_ledger.json:resource_truth and per_chunk_loop_body_lbb0_5"
+  },
+  "a68_first_structural_divergences": [
+    {
+      "boundary": "wave ownership",
+      "evidence": "A_20260925_68_BW16_PRODUCTION_CLOSURE_PROFILE.py:205-246,294-337,377-421,435-481",
+      "finding": "Kd/INV/Mqk/Qd MFMA bodies are guarded by wave < 2, so waves 2/3 do not participate"
+    },
+    {
+      "boundary": "persistent recurrence",
+      "evidence": "A_20260925_68_BW16_PRODUCTION_CLOSURE_PROFILE.py:613-630",
+      "finding": "host loop launches and synchronizes once per chunk; state is re-materialized through global memory between launches"
+    }
+  ],
+  "a69_fix_scope": [
+    "Implement the pinned four-wave mappings above; do not change the A68 mathematical formulas for Kd/pred/U/INV/Qd/Mqk/Kr.",
+    "Move the chunk progression into one device loop and keep H1/H2 as the loop-carried FP32 fragment.",
+    "Use the B67 BF16 tied/VGPR primitives and the validated ordinary-V FP16 primitive; place hazard drains only before non-MFMA consumers.",
+    "Gate correctness in the requested order and stop at the first failed boundary."
+  ]
+}

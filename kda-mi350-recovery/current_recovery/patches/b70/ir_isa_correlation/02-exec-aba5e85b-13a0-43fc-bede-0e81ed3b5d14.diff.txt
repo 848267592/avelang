@@ -1,0 +1,7 @@
+@@ -48,4 +48,4 @@
+         (llir, "%316 = or disjoint i32 %315, %240"),
+-        (llir, "%642 = tail call <4 x float> @llvm.amdgcn.mfma.f32.16x16x16f16"),
+-        (llir, "%810 = tail call <4 x float> @llvm.amdgcn.mfma.f32.16x16x16bf16.1k"),
++        (llir, "%568 = tail call <4 x float> @llvm.amdgcn.mfma.f32.16x16x16f16"),
++        (llir, "%719 = tail call <4 x float> @llvm.amdgcn.mfma.f32.16x16x16bf16.1k"),
+         (isa, "v_mfma_f32_16x16x16_f16 v[18:21], v[22:23], v[122:123], 0"),

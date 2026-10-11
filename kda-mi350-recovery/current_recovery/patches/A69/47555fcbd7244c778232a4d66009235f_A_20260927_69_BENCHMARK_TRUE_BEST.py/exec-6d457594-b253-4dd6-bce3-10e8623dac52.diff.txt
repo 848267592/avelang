@@ -1,0 +1,9 @@
+@@ -59,2 +59,8 @@
+         raise RuntimeError(f"pinned W4 hash mismatch: {actual}")
++    print(
++        "AITER_TRUE_BEST identity: "
++        f"commit={AITer_COMMIT} config=BW16/W4/S2 "
++        "grid=(8,12,1) block=256 "
++        f"hsaco_sha256={actual} entrypoint={W4_SYMBOL}"
++    )
+     module = ctypes.c_void_p()

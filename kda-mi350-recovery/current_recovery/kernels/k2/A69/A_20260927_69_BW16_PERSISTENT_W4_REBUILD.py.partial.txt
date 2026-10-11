@@ -1,0 +1,120 @@
+"""A69 BW16 persistent K2 rebuild.
+
+The source keeps the A68 mathematical body and changes the structural contract
+only: one device-side dynamic chunk loop, live FP32 H fragments, and four-wave
+Kr ownership.  The packet views are intentionally explicit and use the pinned
+BW16 source layouts recorded in the A69 ownership ledger.
+"""
+
+from __future__ import annotations
+
+import torch
+import avelang
+import avelang.language as al
+
+
+HEADS = 12
+HD = 128
+C = 32
+V = 128
+BW = 16
+WG = 256
+LANES = 64
+
+
+@avelang.jit
+def _a69_bw16_k2_persistent(
+    kd_ptr: al.Pointer(al.bf16),
+    qd_ptr: al.Pointer(al.bf16),
+    kr_ptr: al.Pointer(al.bf16),
+    gt_ptr: al.Pointer(al.f32),
+    inv_mqk_ptr: al.Pointer(al.f16),
+    v_ptr: al.Pointer(al.bf16),
+    beta_ptr: al.Pointer(al.f32),
+    initial_state_ptr: al.Pointer(al.f32),
+    nt_ptr: al.Pointer(al.i32),
+    out_ptr: al.Pointer(al.bf16),
+    final_state_ptr: al.Pointer(al.f32),
+    T: al.constexpr,
+    NT: al.constexpr,
+):
+    kd = al.make_tensor(kd_ptr, al.bf16, al.make_layout((HEADS * NT, C, HD), (C * HD, HD, 1)))
+    qd = al.make_tensor(qd_ptr, al.bf16, al.make_layout((HEADS * NT, C, HD), (C * HD, HD, 1)))
+    kr = al.make_tensor(kr_ptr, al.bf16, al.make_layout((HEADS * NT, C, HD), (C * HD, HD, 1)))
+    gt = al.make_tensor(gt_ptr, al.f32, al.make_layout((HEADS * NT, HD), (HD, 1)))
+    inv_mqk = al.make_tensor(
+        inv_mqk_ptr,
+        al.f16,
+        al.make_layout((HEADS * NT, 2, C, C), (2 * C * C, C * C, C, 1)),
+    )
+    v = al.make_tensor(v_ptr, al.bf16, al.make_layout((T, HEADS, V), (HEADS * V, V, 1)))
+    beta = al.make_tensor(beta_ptr, al.f32, al.make_layout((T, HEADS), (HEADS, 1)))
+    initial_state = al.make_tensor(
+        initial_state_ptr,
+        al.f32,
+        al.make_layout((HEADS, HD, V), (HD * V, V, 1)),
+    )
+    nt_tensor = al.make_tensor(nt_ptr, al.i32, al.make_layout((1, 1), (1, 1)))
+    out = al.make_tensor(out_ptr, al.bf16, al.make_layout((T, HEADS, V), (HEADS * V, V, 1)))
+    final_state = al.make_tensor(
+        final_state_ptr,
+        al.f32,
+        al.make_layout((HEADS, HD, V), (HD * V, V, 1)),
+    )
+
+    # 30,720 bytes: the nine C67/AITER slots.  Each alias is temporal and is
+    # fenced by the surrounding CTA barrier before reuse.
+    pool = al.make_shared((7680,), al.u32)
+    kd1 = al.view(al.subview(pool, (0,), (1024,), (1,)), al.bf16, al.make_layout((2048,), (1,)))
+    kd2 = al.view(al.subview(pool, (1024,), (1024,), (1,)), al.bf16, al.make_layout((2048,), (1,)))
+    qd1 = al.view(al.subview(pool, (2048,), (1024,), (1,)), al.bf16, al.make_layout((2048,), (1,)))
+    qd2 = al.view(al.subview(pool, (3072,), (1024,), (1,)), al.bf16, al.make_layout((2048,), (1,)))
+    kr1_t = al.view(al.subview(pool, (4096,), (1024,), (1,)), al.bf16, al.make_layout((2048,), (1,)))
+    kr2_t = al.view(al.subview(pool, (5120,), (1024,), (1,)), al.bf16, al.make_layout((2048,), (1,)))
+    inv = al.view(al.subview(pool, (6144,), (512,), (1,)), al.f16, al.make_layout((1024,), (1,)))
+    mqk = al.view(al.subview(pool, (6656,), (512,), (1,)), al.f16, al.make_layout((1024,), (1,)))
+    overlay_bf = al.view(al.subview(pool, (7168,), (512,), (1,)), al.bf16, al.make_layout((1024,), (1,)))
+    overlay_f16 = al.view(al.subview(pool, (7168,), (512,), (1,)), al.f16, al.make_layout((1024,), (1,)))
+
+    tid = al.thread_id(0)
+    wave = tid >> 6
+    lane = tid & 63
+    pid_x = al.block_id(0)
+    head = al.block_id(1)
+    w0 = pid_x * BW
+
+    # #mma [4,1] H ownership.  This is the only state representation that
+    # crosses the dynamic loop; H is never reloaded from or written to HBM.
+    h1 = al.full((4,), 0.0, al.f32)
+    h2 = al.full((4,), 0.0, al.f32)
+    h_row_base = wave * 16 + (lane >> 4) * 4
+    h_col = lane & 15
+    for acc_i in al.range(4):
+        h1[acc_i] = initial_state[head, h_row_base + acc_i, w0 + h_col]
+        h2[acc_i] = initial_state[head, 64 + h_row_base + acc_i, w0 + h_col]
+
+    nt_limit = nt_tensor[0, 0]
+    chunk_idx = 0
+    while chunk_idx < nt_limit:
+        ws_idx = head * NT + chunk_idx
+        tok_base = chunk_idx * C
+
+        # Kd/Qd source packet ownership: blocked1, four 8-row bands.
+        kd_row = wave * 8 + lane // 8
+        kd_k_base = (lane & 7) * 8
+        for q in al.range(8):
+            kd1[kd_row * 64 + kd_k_base + q] = kd[ws_idx, kd_row, kd_k_base + q]
+            kd2[kd_row * 64 + kd_k_base + q] = kd[ws_idx, kd_row, 64 + kd_k_base + q]
+        al.syncthreads()
+
+        # Publish H1/H2 in the blocked2 packet view.  A lane asks the owning
+        # #mma lane for each element with a wave-local shuffle; this is the
+        # register-to-packet bridge needed by a persistent H fragment.
+        h_pkt_row = wave * 16 + lane // 4
+        h_pkt_col = (lane & 3) * 4
+        h_src_lane_base = (lane // 16) * 16 + (lane & 3) * 4
+        h_src_i = (lane >> 2) & 3
+        for q in al.range(4):
+            src_lane = h_src_lane_base + q
+            h1_pkt = al.shuffle(h1[h_src_i], src_lane, 64)
+            h2_pkt = al.shuffle(h2[h_src_i], src_l

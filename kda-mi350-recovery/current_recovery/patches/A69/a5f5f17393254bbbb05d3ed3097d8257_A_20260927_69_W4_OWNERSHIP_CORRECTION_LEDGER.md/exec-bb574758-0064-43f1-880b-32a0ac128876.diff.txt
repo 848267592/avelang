@@ -1,0 +1,16 @@
+@@ -85 +85,15 @@
+ any performance measurement.
++
++## A69-only sentinel result
++
++The bounded experiment in `A_20260927_69_MMA1_SENTINEL_PROBE.py` compiled and
++ran a unique-value `32x64 bf16 @ 64x16 bf16 -> 32x16 f32` `tl.dot` with
++`num_warps=4` and `num_stages=2`. It produced finite output with checksum
++`17335033856.0`, proving that the Triton logical `#mma1` dot path is
++executable. The compiled kernel object exposed no `ttgir` or `amdgcn`
++assembly through its public `asm` interface (`asm_keys=[]`), so the probe did
++not reveal the required physical per-lane carrier. Its result confirms the
++blocker rather than resolving it; no A69 kernel source change was made.
++
++Evidence: `A_20260927_69_MMA1_SENTINEL.json` and
++`A_20260927_69_MMA1_SENTINEL_PROBE.py` in this report directory.

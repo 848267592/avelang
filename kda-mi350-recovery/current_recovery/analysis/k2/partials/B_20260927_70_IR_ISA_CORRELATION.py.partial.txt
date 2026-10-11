@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+"""Emit the B70 exact AITER IR/ISA correlation ledger.
+
+This is a read-only forensic artifact.  It deliberately does not import the
+A69 source or write anywhere outside the B70 report directory.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[4]
+REPORT = ROOT / "test/examples/kda/reports/B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY"
+GOLDEN = ROOT / "test/examples/kda/reports/C_20260925_67_BW16_W4_MACHINE_GOLDEN_AUDIT"
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def require(path: Path, needle: str) -> None:
+    text = path.read_text()
+    if needle not in text:
+        raise AssertionError(f"missing pinned evidence {needle!r} in {path}")
+
+
+def main() -> None:
+    ttgir = GOLDEN / "golden_reference.ttgir"
+    llir = GOLDEN / "golden_reference.llir"
+    isa = GOLDEN / "golden_reference.isa"
+    amdgcn = GOLDEN / "golden_reference.amdgcn"
+    ledger = GOLDEN / "golden_machine_ledger.json"
+    hsaco = GOLDEN / "golden_reference.hsaco"
+
+    # Guard the report against silently drifting away from the pinned object.
+    for path, needle in (
+        (ttgir, "#mma1 = #ttg.amd_mfma<{version = 3, warpsPerCTA = [2, 2], instrShape = [16, 16, 16], isTransposed = true}>"),
+        (ttgir, "%b_inv_334 = ttg.local_load"),
+        (ttgir, "%b_U_336 = ttg.local_load"),
+        (ttgir, "%b_kr1_t_365 = ttg.local_load"),
+        (llir, "%20 = tail call i32 @llvm.amdgcn.workitem.id.x()"),
+        (llir, "%230 = or disjoint i32 %228, %229"),
+        (llir, "%293 = or disjoint i32 %291, %292"),
+        (llir, "%300 = xor i32 %299, %55"),
+        (llir, "%316 = or disjoint i32 %315, %240"),
+        (llir, "%642 = tail call <4 x float> @llvm.amdgcn.mfma.f32.16x16x16f16"),
+        (llir, "%810 = tail call <4 x float> @llvm.amdgcn.mfma.f32.16x16x16bf16.1k"),
+        (isa, "v_mfma_f32_16x16x16_f16 v[18:21], v[22:23], v[122:123], 0"),
+        (isa, "v_perm_b32 v27, v107, v106, s80"),
+        (amdgcn, "ds_write_b64 v73, v[10:11]"),
+        (amdgcn, "ds_read_u16 v102, v87 offset:16640"),
+    ):
+        require(path, needle)
+
+    pinned = {
+        "aiter_commit": "7bb44998274fa679ece0a37bf8426ab780b1837d",
+        "hsaco_sha256": sha256(hsaco),
+        "hsaco_sha256_expected": "85470da1877fcd49db1b9adee0129fff9787e7953d221817198ce2434cd0ac16",
+        "config": "BW16/W4/S2, num_warps=4, num_stages=2",
+        "grid": [8, 12, 1],
+        "block_threads": 256,
+        "files": {
+            "ttgir": str(ttgir.relative_to(ROOT)),
+            "llir": str(llir.relative_to(ROOT)),
+            "isa": str(isa.relative_to(ROOT)),
+            "amdgcn": str(amdgcn.relative_to(ROOT)),
+            "ledger": str(ledger.relative_to(ROOT)),
+        },
+    }
+    if pinned["hsaco_sha256"] != pinned["hsaco_sha256_expected"]:
+        raise AssertionError("pinned HSACO hash changed")
+
+    layouts = {
+        "mma1": {
+            "encoding": "version=3, warpsPerCTA=[2,2], instrShape=[16,16,16], isTransposed=true",
+            "evidence": "golden_reference.ttgir:8",
+        },
+        "mma": {
+            "encoding": "version=3, warpsPerCTA=[4,1], instrShape=[16,16,16], isTransposed=true",
+            "evidence": "golden_reference.ttgir:7",
+        },
+        "blocked1": {
+            "encoding": "sizePerThread=[1,8], threadsPerWarp=[8,8], warpsPerCTA=[4,1], order=[1,0]",
+            "packet": "row=8*wave+(lane>>3), col=8*(lane&7)+q, q=0..7",
+            "evidence": "golden_reference.ttgir:2,142-143,254-264",
+        },
+        "blocked4": {
+            "encoding": "sizePerThread=[1,4], threadsPerWarp=[8,8], warpsPerCTA=[4,1], order=[1,0]",
+            "packet": "row=8*wave+(lane>>3), col=4*(lane&7)+q, q=0..3",
+            "evidence": "golden_reference.ttgir:5,146,258-260",
+        },
+        "blocked3": {
+            "encoding": "sizePerThread=[1,2], threadsPerWarp=[8,8], warpsPerCTA=[4,1], order=[1,0]",
+            "packet": "row=8*wave+(lane>>3), col=2*(lane&7)+q, q=0..1",
+            "evidence": "golden_reference.ttgir:4,43,81,90",
+        },
+        "blocked_kr": {
+            "encoding": "sizePerThread=[8,1], threadsPerWarp=[8,8], warpsPerCTA=[1,4], order=[0,1]",
+            "packet": "row=8*(lane&7)+q, col=8*wave+(lane>>3), q=0..7",
+            "evidence": "golden_reference.ttgir:1,265-268",
+        },
+    }
+
+    report = {
+        "artifact": "B_20260927_70_BW16_W4_MMA1_LAYOUT_RECOVERY",
+        "read_only": True,
+        "scope": "Exact carrier/LDS/permute recovery from pinned C67 IR/ISA plus B70 isolated probes; no A69 change.",
+        "pinned": pinned,
+        "MMA1_LOGICAL_MAP": {
+            "status": "RECOVERED_EXACT",
+            "variables": "wave=w=(tid>>6)&3, lane=l=tid&63, fragment=f=0..3",
+            "formula": "row=16*(w>>1)+(l&15), col=4*(l>>4)+f",
+            "duplicate_carrier": "waves 0/1 carry the same 16-row band; waves 2/3 carry the second band",
+            "direct_store_probe": "active when (w&1)==0; odd-wave fragments remain computed",
+            "evidence": [
+                "B_20260927_70_b70_mma1_kd.llir:10-18,125-135",
+                "B_20260927_70_b70_mma1_inv.llir:10-23,89-97",
+                "C67 golden_reference.ttgir:8",
+            ],
+            "independent_probe": {
+                "matrix_reconstruction": "exact",
+                "max_abs": 0.0,
+                "max_rel": 0.0,
+                "four_wave_result_coverage": 512,
+                "even_wave_direct_store_coverage": 512,
+            },
+        },
+        "ORDINARY_V_CARRIER_MAP": {
+            "status": "RECOVERED_EXACT",
+            "result_carrier": "one contiguous four-FP32 VGPR bank v[d:d+3], fragment f is bank offset f",
+            "half_input_carrier": "one four-half packet is two 32-bit VGPR words: (x0 | x1<<16), (x2 | x3<<16)",
+            "physical_transposed_order": "mathematical B/right operand is MFMA src0; mathematical A/left operand is MFMA src1; C is the tied third operand",
+            "phase_register_chains": {
+                "Kd_H_and_Qd_H": "C67 ISA Kd 454-499 and Qd/output chain 552-574,596; v[96:99] -> v[18:21] and v[22:25]/v[18:21]/v[94:97] as scheduled",
+                "INV": "C67 ISA: zero v[18:21] at 576, continuation v[26:29] at 578",
+                "Mqk": "C67 ISA: tied v[94:97] at 601,603",
+                "Kr1": "C67 ISA: tied v[2:5] at 710,715",
+                "Kr2": "C67 ISA: tied v[6:9] at 719,724",
+            },
+            "evidence": [
+                "B70 isolated ordinary-V MFMA calls in b70_mma1_kd.llir:125-128",
+                "C67 golden_reference.llir:551-554,567-570,642-643,664-671,690-691,810-822",
+                "C67 golden_reference.isa:454-499,552-603,710-724",
+            ],
+        },
+        "LDS_WAVE_MAP": {
+            "status": "RECOVERED_EXACT_FROM_PINNED_LLIR",
+            "address_unit": "byte offset from @global_smem",
+            "symbols": {
+                "t": "64*w+l",
+                "r": "l&15",
+                "b": "l&48",
+                "A_shared": "(((64*w)&128)<<4) | (r<<7) | ((r<<3) ^ (b>>1))",
+                "H_shared": "(32*w) ^ ((b<<5) | (l<<1))",
+                "A_fp16": "(((64*w)&128)<<3) | (r<<6) | (((t<<2)&56) ^ (b>>1))",
+                "U0": "((((64*w)&128)>>2) | (b<<4) | (r<<1)) ^ b",
+                "U2": "(((t<<2)&56) ^ (b>>1)) | (r<<6)",
+                "Kr0": "(32*w) | (b<<5) | (r<<1)",
+            },
+            "physical_slots": [
+                {"base": 0, "bytes": 4096, "role": "Kd1", "layout": "#shared"},
+                {"base": 4096, "bytes": 4096, "role": "Kd2", "layout": "#shared"},
+                {"base": 8192, "bytes": 4096, "role": "Qd1", "layout": "#shared"},
+                {"base": 12288, "bytes": 4096, "role": "Qd2", "layout": "#shared"},
+                {"base": 16384, "bytes": 4096, "role": "Kr1", "layout": "#shared2"},
+                {"base": 20480, "bytes": 4096, "role": "Kr2", "layout": "#shared2"},
+                {"base": 24576, "bytes": 2048, "role": "INV", "layout": "#shared1"},
+                {"base": 26624, "bytes": 2048, "role": "Mqk", "layout": "#shared1"},
+                {"base": 28672, "bytes": 2048, "role": "H/U temporal overlay", "layout": "#shared3/#shared4"},
+            ],
+            "stage_contracts": [
+                {
+                    "stage": "Kd",
+                    "logical_packet": "#blocked1 [32,64] BF16; q=0..7",
+                    "producer": "base 0/4096 + ((t<<4) ^ (t&120)) and +8; each packet 8 B",
+                    "consumer": "base 0/4096 + A_shared + {0,32,64,96}; each load <4xi16> = 8 B",
+                    "mfma": "8 BF16 calls; first physical source is H, second is Kd; C continuation is tied",
+                    "sync_evidence": "LLIR 526-570; waits/barriers 528-529,545-546,555-562",
+                },
+                {
+                    "stage": "Qd",
+                    "logical_packet": "#blocked1 [32,64] BF16; q=0..7",
+                    "producer": "base 8192/12288 + ((t<<4) ^ (t&120)) and +8; each packet 8 B",
+                    "consumer": "base 8192/12288 + A_shared + {0,32,64,96}; each load <4xi16> = 8 B",
+                    "mfma": "8 BF16 calls; H is physical src0, Qd is physical src1; result continues into output/Mqk accumulator chain",
+                    "sync_evidence": "LLIR 652-671 and 676-691; ISA 552-574,596",
+                },
+                {
+                    "stage": "INV",
+                    "logical_packet": "#blocked4 [32,32] FP16; q=0..3",
+                    "producer": "base 24576 + I_write or base 26624 for Mqk, I_write=(t<<3)^((t>>1)&56); each packet 8 B",
+                    "consumer": "base 24576 + A_fp16 and A_fp16^32; each load <4xhalf> = 8 B",
+                    "right_operand": "U/b_u FP16 is staged in the 28672 temporal overlay",
+                    "mfma": "2 FP16 calls; U/b_u physical src0, INV physical src1, first C zero and second C tied",
+                    "sync_evidence": "LLIR 617-643; waits/barriers 628-639; no drain between 642 and 643",
+                },
+                {
+                    "stage": "Mqk",
+                    "logical_packet": "#blocked4 [32,32] FP16; q=0..3",
+                    "producer": "same #shared1 packet contract as INV, base 26624",
+                    "consumer": "base 26624 + A_fp16 and A_fp16^32; U FP16 packet reads are 28672 + U2 and 28672 + (U2^32)",
+                    "mfma": "2 FP16 calls; U physical src0, Mqk physical src1, C is the Qd FP32 accumulator",
+                    "sync_evidence": "LLIR 648-691; waits/barriers 676-687; no drain between 690 and 691",
+                },
+                {
+                    "stage": "Kr1",
+                    "logical_packet": "#blocked [64,32] BF16 transposed; q=0..7",
+                    "producer": "base 16384 + (t<<4), 16 B per lane",
+                    "consumer": "base 16384 + Kr0 | o, o={0,128,256,384,2048,2176,2304,2432}; scalar 2 B reads",
+                    "packet_assembly": "LLVM shufflevectors 801-806 form [679,680,682,684] and [685,686,688,690]",
+                    "mfma": "2 BF16 calls; U physical src0, Kr1 physical src1, C tied to v[2:5]",
+                    "sync_evidence": "LLIR 761-811; wait/barrier 787-798; waitcnt lgkmcnt(3,2) before the two calls",
+                },
+                {
+                    "stage": "Kr2",
+                    "logical_packet": "#blocked [64,32] BF16 transposed; q=0..7",
+                    "producer": "base 20480 + (t<<4), 16 B per lane",
+                    "consumer": "base 20480 + Kr0 | o, same eight scalar offsets",
+                    "packet_assembly": "LLVM shufflevectors 812-817 form [692,693,695,697] and [698,699,701,703]",
+                    "mfma": "2 BF16 calls; U physical src0, Kr2 physical src1, C tied to v[6:9]",
+                    "sync_evidence": "LLIR 774-822; wait/barrier 787-798; waitcnt lgkmcnt(1,0) before the two calls",
+                },
+            ],
+            "reuse_contract":

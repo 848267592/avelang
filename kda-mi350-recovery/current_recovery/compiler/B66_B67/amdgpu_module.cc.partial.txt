@@ -1,0 +1,116 @@
+
+    AddFunction(
+        "raw_buffer_store_x2",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateRawBufferStoreX2Function(call_expr, gen_ctx,
+                                                  resolved_args);
+        },
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> bool {
+            return CheckGenericRawBufferStoreFunction(call_expr, gen_ctx,
+                                                      resolved_args, 2);
+        });
+
+    AddFunction(
+        "raw_buffer_store_x4",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateRawBufferStoreX4Function(call_expr, gen_ctx,
+                                                  resolved_args);
+        },
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> bool {
+            return CheckGenericRawBufferStoreFunction(call_expr, gen_ctx,
+                                                      resolved_args, 4);
+        });
+
+    AddFunction(
+        "sched_group_barrier",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateSchedGroupBarrierFunction(call_expr, gen_ctx,
+                                                   resolved_args);
+        },
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> bool {
+            return CheckSchedGroupBarrierFunction(call_expr, gen_ctx,
+                                                  resolved_args);
+        });
+
+    AddFunction(
+        "s_nop",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateSNopFunction(call_expr, gen_ctx, resolved_args);
+        },
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> bool {
+            return CheckSNopFunction(call_expr, gen_ctx, resolved_args);
+        });
+
+    AddFunction(
+        "mfma_hazard_drain",
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> mlir::Value {
+            return CreateMfmaHazardDrainFunction(call_expr, gen_ctx,
+                                                 resolved_args);
+        },
+        [this](ast::Call *call_expr, GeneratorContext *gen_ctx,
+               llvm::ArrayRef<mlir::Value> resolved_args) -> bool {
+            return CheckMfmaHazardDrainFunction(call_expr, gen_ctx,
+                                                resolved_args);
+        });
+}
+
+void AMDGPUIntrinsic::DeclareModules(mlir::ModuleOp module) {
+    if (!module)
+        return;
+
+    // Register the bytecode in the intrinsic registry
+    auto libraryBytes = GetAmdgpuIntrinsicLibrary();
+    auto &registry = utils::EmbeddedFilesystemView::getInstance();
+    registry.registerFile(std::string(kAmdgpuIntrinsicLibraryName),
+                          libraryBytes);
+
+    intrinsics::GetOrCreateImplementationContainer(module, "amdgpu",
+                                                   kAmdgpuIntrinsicLibraryTag);
+
+    auto loadDialects = [](mlir::MLIRContext *ctx) {
+        ctx->loadDialect<mlir::arith::ArithDialect, mlir::func::FuncDialect,
+                         mlir::vector::VectorDialect, mlir::LLVM::LLVMDialect,
+        (*rangeValue < 0 ||
+         static_cast<uint64_t>(*rangeValue) >
+             static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))) {
+        ctx->diagnostic_manager->Report(basic::DiagnosticCode::kUnimplemented,
+                                        call_expr->GetSourceRange().getBegin())
+            << "make_rsrc() requires range to be in [0, 2^32-1]";
+        return false;
+    }
+
+    return true;
+}
+
+bool AMDGPUIntrinsic::CheckRcpFunction(
+    ast::Call *call_expr, GeneratorContext *ctx,
+    llvm::ArrayRef<mlir::Value> resolved_args) const {
+    if (call_expr->GetArgs().size() != 1 || resolved_args.size() != 1 ||
+        !resolved_args[0]) {
+        ctx->diagnostic_manager->Report(basic::DiagnosticCode::kUnimplemented,
+                                        call_expr->GetSourceRange().getBegin())
+            << "rcp() requires exactly 1 argument";
+        return false;
+    }
+
+    if (!resolved_args[0].getType().isF32()) {
+        ctx->diagnostic_manager->Report(basic::DiagnosticCode::kUnimplemented,
+                                        call_expr->GetSourceRange().getBegin())
+            << "rcp() expects an f32 argument";
+        return false;
+    }
+
+    return true;
+}
+
+bool AMDGPUIntrinsic::CheckSWaitcntFunction(
+    ast::Call *call_expr, GeneratorContext *ct
